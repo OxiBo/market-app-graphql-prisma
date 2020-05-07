@@ -1,0 +1,128 @@
+type Query {
+  users: [User!]!
+  sellers: [Seller!]!
+  products: [Product!]!
+}
+
+type Mutation {
+  createUser(data: CreateUserInput!): UserAuthPayLoad!
+  loginUser(data: LoginUserInput!): UserAuthPayLoad!
+  createSeller(data: CreateSellerInput!): SellerAuthPayLoad!
+  loginSeller(data: LoginUserInput!): SellerAuthPayLoad!
+  createProduct(data: CreateProductInput!): Product!
+  updateProduct(id: ID!, data: UpdateProductInput!): Product!
+}
+
+enum UserType {
+  BUYER
+}
+
+enum SellerType {
+  SELLER
+}
+
+type User {
+  id: ID!
+  name: String!
+  #  email will have to be changed this to nullable because email wont be returned to every query
+  email: String
+  password: String!
+  age: Int
+  orders: [Order!]!
+  reviews: [Review!]!
+  type: UserType!
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
+  password: String!
+  age: Int
+  type: UserType!
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
+type UserAuthPayLoad {
+  token: String!
+  user: User!
+}
+
+type Seller {
+  id: ID!
+  name: String!
+  #  ???? email will have to be changed this to nullable because email wont be returned to every query
+  email: String
+  password: String!
+  products: [Product!]!
+  orders: [Order!]!
+  type: SellerType!
+}
+
+input CreateSellerInput {
+  name: String!
+  email: String!
+  password: String!
+  type: SellerType!
+}
+
+input LoginSellerInput {
+  email: String!
+  password: String!
+}
+
+type SellerAuthPayLoad {
+  token: String!
+  seller: Seller!
+}
+
+type Product {
+  id: ID!
+  name: String!
+  department: String!
+  price: Float!
+  count: Int!
+  seller: Seller!
+  reviews: [Review!]!
+  orders: [Order!]!
+}
+
+input CreateProductInput {
+  name: String!
+  department: String!
+  price: Float!
+  count: Int!
+  #   seller: ID!
+}
+
+input UpdateProductInput {
+  name: String
+  department: String
+  price: Float
+  count: Int
+}
+
+type Order {
+  id: ID!
+  products: [Product!]!
+  total: Float!
+  user: User!
+}
+
+input CreateOrderInput {
+  products: [ID!]!
+  total: Float!
+  #   user: ID!
+}
+
+type Review {
+  id: ID!
+  text: String!
+  rating: Int!
+  user: User!
+  product: Product!
+  published: Boolean!
+}

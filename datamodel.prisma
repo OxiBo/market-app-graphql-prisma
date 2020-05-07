@@ -1,0 +1,56 @@
+type User {
+    id: ID!@id
+    name: String!
+    email: String!@unique
+    password: String!
+    age: Int
+    type: String!
+    createdAt: DateTime!@createdAt
+    updatedAt: DateTime!@updatedAt
+    orders: [Order!]! @relation(name: "OrderToUser", onDelete: CASCADE)
+    reviews: [Review!]! @relation(name: "ReviewToUser", onDelete: CASCADE)
+}
+
+type Seller {
+    id: ID!@id
+    name: String!@unique
+    email: String!@unique
+    password: String!
+    type: String!
+    createdAt: DateTime!@createdAt
+    updatedAt: DateTime!@updatedAt
+    products: [Product!]! @relation(name: "SellerToProduct", onDelete: CASCADE)
+    orders: [Order!]!@relation(name: "SellerToOrder", onDelete: SET_NULL)
+}
+
+type Product {
+  id: ID! @id
+  name: String!
+  department: String!
+  count: Int!
+  price: Float!
+  createdAt: DateTime!@createdAt
+  updatedAt: DateTime!@updatedAt
+  seller: Seller!@relation(name: "SellerToProduct", onDelete: SET_NULL)
+  reviews: [Review!]! @relation(name: "ReviewToProduct", onDelete: CASCADE)
+}
+
+type Order {
+  id: ID! @id
+  products: [Product!]! @relation(name: "ProductToOrder", onDelete: SET_NULL)
+  total: Float!
+  user: User! @relation(name: "OrderToUser", onDelete: SET_NULL)
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime!@updatedAt
+}
+
+type Review {
+ id: ID! @id
+ text: String!
+ rating: Int!
+ product: Product! @relation(name: "ReviewToProduct", onDelete: SET_NULL)
+ user: User! @relation(name: "ReviewToUser", onDelete: SET_NULL)
+ published: Boolean!
+ createdAt: DateTime! @createdAt
+ updatedAt: DateTime!@updatedAt
+}
