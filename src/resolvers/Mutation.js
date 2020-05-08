@@ -47,6 +47,50 @@ const Mutation = {
       token: generateJWTtoken(userExists.id),
     };
   },
+  async updateUser(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+
+    const user = await prisma.exists.User({ id: userId });
+    if (!user) {
+      throw new Error(
+        "You have to be a logged-in buyer to update your profile"
+      );
+    }
+
+    if (typeof args.data.password === "string") {
+      args.data.password = await hashPassword(args.data.password);
+    }
+
+    return prisma.mutation.updateUser(
+      {
+        where: {
+          id: userId,
+        },
+        data: {
+          ...args.data,
+        },
+      },
+      info
+    );
+  },
+  async deleteUser(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    const foundUser = await prisma.exists.User({
+      id: userId,
+    });
+    if (!foundUser) {
+      throw new Error("User not found");
+    }
+
+    return prisma.mutation.deleteUser(
+      {
+        where: {
+          id: userId,
+        },
+      },
+      info
+    );
+  },
   async createSeller(parent, args, { prisma }, info) {
     // console.log(args.data)
 
@@ -88,6 +132,50 @@ const Mutation = {
       token: generateJWTtoken(sellerExists.id),
     };
   },
+  async updateSeller(parent, args, { prisma, request }, info) {
+    const sellerId = getUserId(request);
+
+    const seller = await prisma.exists.Seller({ id: sellerId });
+    if (!seller) {
+      throw new Error(
+        "You have to be a logged-in seller to update your profile"
+      );
+    }
+
+    if (typeof args.data.password === "string") {
+      args.data.password = await hashPassword(args.data.password);
+    }
+
+    return prisma.mutation.updateSeller(
+      {
+        where: {
+          id: sellerId,
+        },
+        data: {
+          ...args.data,
+        },
+      },
+      info
+    );
+  },
+  async deleteSeller(parent, args, { prisma, request }, info) {
+    const sellerId = getUserId(request);
+    const foundSeller = await prisma.exists.Seller({
+      id: sellerId,
+    });
+    if (!foundSeller) {
+      throw new Error("Seller not found");
+    }
+
+    return prisma.mutation.deleteSeller(
+      {
+        where: {
+          id: sellerId,
+        },
+      },
+      info
+    );
+  },
   async createProduct(parent, args, { prisma, request }, info) {
     //   console.log(request.request.headers)
     const sellerId = getUserId(request);
@@ -99,16 +187,38 @@ const Mutation = {
     if (!seller) {
       throw new Error("You have to be a seller to create a new product");
     }
-    return prisma.mutation.createProduct({
-      data: {
-        ...args.data,
-        seller: {
-          connect: {
-            id: sellerId,
+
+    const isUniqueName = await prisma.query.products({
+      where: {
+        AND: [
+          {
+            name: args.data.name,
+          },
+          {
+            seller: {
+              id: sellerId,
+            },
+          },
+        ],
+      },
+    });
+
+    if (isUniqueName.length) {
+      throw new Error("You have a product with this name already");
+    }
+    return prisma.mutation.createProduct(
+      {
+        data: {
+          ...args.data,
+          seller: {
+            connect: {
+              id: sellerId,
+            },
           },
         },
       },
-    });
+      info
+    );
   },
   async updateProduct(parent, args, { prisma, request }, info) {
     const sellerId = getUserId(request);
@@ -140,6 +250,36 @@ const Mutation = {
         },
         data: {
           ...args.data,
+        },
+      },
+      info
+    );
+  },
+  async deleteProduct(parent, args, { prisma, request }, info) {
+    const sellerId = getUserId(request);
+    const sellerExists = await prisma.exists.Seller({
+      id: sellerId,
+    });
+    if (!sellerExists) {
+      throw new Error("You have to be a seller to delete the product");
+    }
+
+    const productExists = await prisma.exists.Product({
+      id: args.id,
+      seller: {
+        id: sellerId,
+      },
+    });
+
+    if (!productExists) {
+      throw new Error(
+        "Unable to delete the product. Product not found in your product list"
+      );
+    }
+    return prisma.mutation.deleteProduct(
+      {
+        where: {
+          id: args.id,
         },
       },
       info

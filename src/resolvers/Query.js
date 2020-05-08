@@ -1,14 +1,63 @@
+import getUserId from "../utils/getUserId";
+
 const Query = {
   users(parent, args, { prisma }, info) {
-     
-    return prisma.query.users(null, info)
+    const opArgs = {};
+    if (args.query) {
+      opArgs.where = {
+        OR: [{ name_contains: args.query }, { email_contains: args.query }],
+      };
+    }
+    return prisma.query.users(opArgs, info);
+  },
+  meUser(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    return prisma.query.user(
+      {
+        where: {
+          id: userId,
+        },
+      },
+      info
+    );
   },
   sellers(parent, args, { prisma }, info) {
-    return prisma.query.sellers(null, info)
+    const opArgs = {};
+    if (args.query) {
+      opArgs.where = {
+        OR: [{ name_contains: args.query }, { email_contains: args.query }],
+      };
+    }
+    return prisma.query.sellers(opArgs, info);
   },
-  products(parent, args, { prisma }, info){
-      return prisma.query.products(null, info)
-  }
+  meSeller(parent, args, { prisma, request }, info) {
+    const sellerId = getUserId(request);
+    return prisma.query.seller(
+      {
+        where: {
+          id: sellerId,
+        },
+      },
+      info
+    );
+  },
+  products(parent, args, { prisma }, info) {
+    const opArgs = {};
+    if (args.query) {
+      opArgs.where = {
+        OR: [
+          { name_contains: args.query },
+          { department_contains: args.query },
+          {
+            seller: {
+              name_contains: args.query,
+            },
+          },
+        ],
+      };
+    }
+    return prisma.query.products(opArgs, info);
+  },
 };
 
 export default Query;

@@ -1,16 +1,23 @@
 type Query {
-  users: [User!]!
-  sellers: [Seller!]!
-  products: [Product!]!
+  users(query: String): [User!]!
+  sellers(query: String): [Seller!]!
+  products(query: String): [Product!]!
+  meUser: User!
+  meSeller: Seller!
 }
 
 type Mutation {
   createUser(data: CreateUserInput!): UserAuthPayLoad!
   loginUser(data: LoginUserInput!): UserAuthPayLoad!
+  updateUser(data: UpdateUserInput!): User!
+  deleteUser: User!
   createSeller(data: CreateSellerInput!): SellerAuthPayLoad!
   loginSeller(data: LoginUserInput!): SellerAuthPayLoad!
+  updateSeller(data: UpdateSellerInput!): Seller!
+  deleteSeller: Seller!
   createProduct(data: CreateProductInput!): Product!
   updateProduct(id: ID!, data: UpdateProductInput!): Product!
+  deleteProduct(id: ID!): Product!
 }
 
 enum UserType {
@@ -51,6 +58,13 @@ type UserAuthPayLoad {
   user: User!
 }
 
+input UpdateUserInput {
+  name: String
+  email: String
+  password: String
+  age: Int
+}
+
 type Seller {
   id: ID!
   name: String!
@@ -77,6 +91,12 @@ input LoginSellerInput {
 type SellerAuthPayLoad {
   token: String!
   seller: Seller!
+}
+
+input UpdateSellerInput {
+  name: String
+  email: String
+  password: String
 }
 
 type Product {
