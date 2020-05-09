@@ -13,6 +13,26 @@ const User = {
       }
     },
   },
+  reviews: {
+    fragment: "fragment userId on User { id }",
+    resolve(parent, args, { prisma, request }, info) {
+      //   console.log(parent)
+      const opArgs = {
+        where: {
+          published: true,
+          user: {
+            id: parent.id,
+          },
+        },
+      };
+      const userId = getUserId(request, false);
+      if (userId && userId === parent.id) {
+        opArgs.where = {};
+      }
+      return prisma.query.reviews(opArgs, info);
+    },
+  },
+  
 };
 
 export default User;

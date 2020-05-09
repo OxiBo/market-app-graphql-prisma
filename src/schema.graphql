@@ -4,6 +4,7 @@ type Query {
   products(query: String): [Product!]!
   meUser: User!
   meSeller: Seller!
+  reviews: [Review!]!
 }
 
 type Mutation {
@@ -18,6 +19,9 @@ type Mutation {
   createProduct(data: CreateProductInput!): Product!
   updateProduct(id: ID!, data: UpdateProductInput!): Product!
   deleteProduct(id: ID!): Product!
+  createReview(data: CreateReviewInput!): Review!
+  updateReview(id: ID!, data: UpdateReviewInput!): Review!
+  deleteReview(id: ID!): Review!
 }
 
 enum UserType {
@@ -145,4 +149,16 @@ type Review {
   user: User!
   product: Product!
   published: Boolean!
+}
+
+input CreateReviewInput {
+  text: String!
+  rating: Int!
+  product: ID!
+  published: Boolean!
+}
+input UpdateReviewInput{
+ text: String
+ rating: Int
+ published: Boolean
 }

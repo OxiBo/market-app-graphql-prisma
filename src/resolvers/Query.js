@@ -58,6 +58,18 @@ const Query = {
     }
     return prisma.query.products(opArgs, info);
   },
+  // TODO - make ALL my reviews visible or only published???
+  reviews(parent, args, { prisma, request }, info) {
+   
+    const opArgs = {
+      where: {
+        published: true,
+      },
+    };
+    
+
+    return prisma.query.reviews(opArgs, info);
+  },
 };
 
 export default Query;

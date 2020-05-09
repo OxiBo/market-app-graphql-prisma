@@ -6,13 +6,15 @@ import Mutation from "./Mutation";
 import User from "./User";
 import Seller from "./Seller";
 import Product from "./Product";
+import Review from "./Review";
 
 const resolvers = {
   Query,
   Mutation,
   User, 
   Seller,
-  Product
+  Product,
+  Review
 };
 const fragmentReplacements = extractFragmentReplacements(resolvers);
 

@@ -285,6 +285,78 @@ const Mutation = {
       info
     );
   },
+
+  async createReview(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    const foundUser = await prisma.exists.User({
+      id: userId,
+    });
+    if (!foundUser) {
+      throw new Error("You have to be logged in user to write a review");
+    }
+
+    // TODO - make sure user have the product among products they purchased
+    return prisma.mutation.createReview(
+      {
+        data: {
+          ...args.data,
+          product: {
+            connect: {
+              id: args.data.product,
+            },
+          },
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+        },
+      },
+      info
+    );
+  },
+  async updateReview(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    const foundReview = await prisma.exists.Review({
+      id: args.id,
+      user: {
+        id: userId,
+      },
+    });
+    if (!foundReview) {
+      throw new Error("Review not found");
+    }
+
+    return prisma.mutation.updateReview(
+      {
+        where: {
+          id: args.id,
+        },
+        data: args.data,
+      },
+      info
+    );
+  },
+  async deleteReview(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    const foundReview = await prisma.exists.Review({
+      id: args.id,
+      user: {
+        id: userId,
+      },
+    });
+    if (!foundReview) {
+      throw new Error("Review not found");
+    }
+    return prisma.mutation.deleteReview(
+      {
+        where: {
+          id: args.id,
+        },
+      },
+      info
+    );
+  },
 };
 
 export default Mutation;
