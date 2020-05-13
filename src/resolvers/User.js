@@ -16,7 +16,7 @@ const User = {
   reviews: {
     fragment: "fragment userId on User { id }",
     resolve(parent, args, { prisma, request }, info) {
-      //   console.log(parent)
+        // console.log(JSON.stringify(parent, null, 3))
       const opArgs = {
         where: {
           published: true,

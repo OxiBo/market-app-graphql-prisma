@@ -1,5 +1,5 @@
 # source: http://localhost:4466/market
-# timestamp: Wed May 06 2020 17:34:31 GMT-0400 (EDT)
+# timestamp: Mon May 11 2020 00:24:09 GMT-0400 (EDT)
 
 type AggregateOrder {
   count: Int!
@@ -532,6 +532,7 @@ type Product implements Node {
   department: String!
   count: Int!
   price: Float!
+  rating: Float!
   createdAt: DateTime!
   updatedAt: DateTime!
   seller: Seller!
@@ -554,6 +555,7 @@ input ProductCreateInput {
   department: String!
   count: Int!
   price: Float!
+  rating: Float!
   seller: SellerCreateOneWithoutProductsInput!
   reviews: ReviewCreateManyWithoutProductInput
 }
@@ -579,6 +581,7 @@ input ProductCreateWithoutReviewsInput {
   department: String!
   count: Int!
   price: Float!
+  rating: Float!
   seller: SellerCreateOneWithoutProductsInput!
 }
 
@@ -588,6 +591,7 @@ input ProductCreateWithoutSellerInput {
   department: String!
   count: Int!
   price: Float!
+  rating: Float!
   reviews: ReviewCreateManyWithoutProductInput
 }
 
@@ -611,6 +615,8 @@ enum ProductOrderByInput {
   count_DESC
   price_ASC
   price_DESC
+  rating_ASC
+  rating_DESC
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
@@ -623,6 +629,7 @@ type ProductPreviousValues {
   department: String!
   count: Int!
   price: Float!
+  rating: Float!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -800,6 +807,28 @@ input ProductScalarWhereInput {
 
   """All values greater than or equal the given value."""
   price_gte: Float
+  rating: Float
+
+  """All values that are not equal to given value."""
+  rating_not: Float
+
+  """All values that are contained in given list."""
+  rating_in: [Float!]
+
+  """All values that are not contained in given list."""
+  rating_not_in: [Float!]
+
+  """All values less than the given value."""
+  rating_lt: Float
+
+  """All values less than or equal the given value."""
+  rating_lte: Float
+
+  """All values greater than the given value."""
+  rating_gt: Float
+
+  """All values greater than or equal the given value."""
+  rating_gte: Float
   createdAt: DateTime
 
   """All values that are not equal to given value."""
@@ -888,6 +917,7 @@ input ProductUpdateDataInput {
   department: String
   count: Int
   price: Float
+  rating: Float
   seller: SellerUpdateOneRequiredWithoutProductsInput
   reviews: ReviewUpdateManyWithoutProductInput
 }
@@ -897,6 +927,7 @@ input ProductUpdateInput {
   department: String
   count: Int
   price: Float
+  rating: Float
   seller: SellerUpdateOneRequiredWithoutProductsInput
   reviews: ReviewUpdateManyWithoutProductInput
 }
@@ -906,6 +937,7 @@ input ProductUpdateManyDataInput {
   department: String
   count: Int
   price: Float
+  rating: Float
 }
 
 input ProductUpdateManyInput {
@@ -925,6 +957,7 @@ input ProductUpdateManyMutationInput {
   department: String
   count: Int
   price: Float
+  rating: Float
 }
 
 input ProductUpdateManyWithoutSellerInput {
@@ -956,6 +989,7 @@ input ProductUpdateWithoutReviewsDataInput {
   department: String
   count: Int
   price: Float
+  rating: Float
   seller: SellerUpdateOneRequiredWithoutProductsInput
 }
 
@@ -964,6 +998,7 @@ input ProductUpdateWithoutSellerDataInput {
   department: String
   count: Int
   price: Float
+  rating: Float
   reviews: ReviewUpdateManyWithoutProductInput
 }
 
@@ -1167,6 +1202,28 @@ input ProductWhereInput {
 
   """All values greater than or equal the given value."""
   price_gte: Float
+  rating: Float
+
+  """All values that are not equal to given value."""
+  rating_not: Float
+
+  """All values that are contained in given list."""
+  rating_in: [Float!]
+
+  """All values that are not contained in given list."""
+  rating_not_in: [Float!]
+
+  """All values less than the given value."""
+  rating_lt: Float
+
+  """All values less than or equal the given value."""
+  rating_lte: Float
+
+  """All values greater than the given value."""
+  rating_gt: Float
+
+  """All values greater than or equal the given value."""
+  rating_gte: Float
   createdAt: DateTime
 
   """All values that are not equal to given value."""

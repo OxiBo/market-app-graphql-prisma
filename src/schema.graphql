@@ -1,10 +1,12 @@
+# import UserOrderByInput, SellerOrderByInput, ReviewOrderByInput, ProductOrderByInput, OrderOrderByInput from './generated/prisma.graphql'
+
 type Query {
-  users(query: String): [User!]!
-  sellers(query: String): [Seller!]!
-  products(query: String): [Product!]!
+  users(query: String, first: Int, skip: Int, after: String, orderBy: UserOrderByInput): [User!]!
+  sellers(query: String, first: Int, skip: Int, after: String, orderBy: SellerOrderByInput): [Seller!]!
+  products(query: String, first: Int, skip: Int, after: String, orderBy: ProductOrderByInput): [Product!]!
   meUser: User!
   meSeller: Seller!
-  reviews: [Review!]!
+  reviews(first: Int, skip: Int, after: String, orderBy: ReviewOrderByInput): [Review!]!
 }
 
 type Mutation {
@@ -109,6 +111,7 @@ type Product {
   department: String!
   price: Float!
   count: Int!
+  rating: Float!
   seller: Seller!
   reviews: [Review!]!
   orders: [Order!]!

@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import getUserId from "../utils/getUserId";
 import hashPassword from "../utils/hashPassword";
 import generateJWTtoken from "../utils/generateJWTtoken";
+import calcProductRating from "../utils/calcProductRating";
 
 const Mutation = {
   async createUser(parent, args, { prisma }, info) {
@@ -221,28 +222,40 @@ const Mutation = {
     );
   },
   async updateProduct(parent, args, { prisma, request }, info) {
-    const sellerId = getUserId(request);
-    const sellerExists = await prisma.exists.Seller({
-      id: sellerId,
-    });
-    if (!sellerExists) {
-      throw new Error("You have to be a seller to update the product");
+    if (args.data.rating) {
+      const userId = getUserId(request);
+      const userExists = await prisma.exists.User({
+        id: userId,
+      });
+      if (!userExists) {
+        throw new Error("You have to be logged in User to do that");
+      }
+    } else {
+      const sellerId = getUserId(request);
+      const sellerExists = await prisma.exists.Seller({
+        id: sellerId,
+      });
+      if (!sellerExists) {
+        throw new Error("You have to be a seller to update the product");
+      }
     }
+
     const productExists = await prisma.exists.Product({
       id: args.id,
 
-      seller: {
-        id: sellerId,
-      },
+      //   seller: {
+      //     id: sellerId,
+      //   },
     });
 
     if (!productExists) {
       throw new Error("Product not found");
     }
 
-    if (args.data.count < 0) {
+    if (args.data.count && args.data.count < 0) {
       throw new Error("Product count has to be 0 or more");
     }
+
     return prisma.mutation.updateProduct(
       {
         where: {
@@ -255,6 +268,17 @@ const Mutation = {
       info
     );
   },
+  //   updateProductRating(parent, args, { prisma, request }, info) {
+  //     return prisma.mutation.updateProductRating(
+  //       {
+  //         where: {
+  //           product: args.id,
+  //         },
+  //         rating: args.rating,
+  //       },
+  //       info
+  //     );
+  //   },
   async deleteProduct(parent, args, { prisma, request }, info) {
     const sellerId = getUserId(request);
     const sellerExists = await prisma.exists.Seller({
@@ -295,6 +319,23 @@ const Mutation = {
       throw new Error("You have to be logged in user to write a review");
     }
 
+    const allProductReviews = await prisma.query.reviews({
+      where: {
+        published: true,
+        product: {
+          id: args.data.product,
+        },
+      },
+    });
+
+    await calcProductRating(
+      allProductReviews,
+      args.data.product,
+      args.data.rating,
+      info,
+      1
+    );
+
     // TODO - make sure user have the product among products they purchased
     return prisma.mutation.createReview(
       {
@@ -327,6 +368,39 @@ const Mutation = {
       throw new Error("Review not found");
     }
 
+    if (args.data.rating || args.data.published === false) {
+      const productReview = await prisma.query.review(
+        {
+          where: {
+            id: args.id,
+          },
+        },
+        "{ product { id }}"
+      );
+
+      const allReviewsWithoutUpdated = await prisma.query.reviews({
+        where: {
+          AND: [
+            {
+              product: {
+                id: productReview.product.id,
+              },
+            },
+            { published: true },
+            { id_not: args.id },
+          ],
+        },
+      });
+
+      calcProductRating(
+        allReviewsWithoutUpdated,
+        productReview.product.id,
+        args.data.rating,
+        info,
+        1
+      );
+    }
+
     return prisma.mutation.updateReview(
       {
         where: {
@@ -334,7 +408,8 @@ const Mutation = {
         },
         data: args.data,
       },
-      info
+      info,
+      0
     );
   },
   async deleteReview(parent, args, { prisma, request }, info) {
@@ -348,6 +423,38 @@ const Mutation = {
     if (!foundReview) {
       throw new Error("Review not found");
     }
+
+    const productReview = await prisma.query.review(
+      {
+        where: {
+          id: args.id,
+        },
+      },
+      "{ product { id }}"
+    );
+
+    const allReviewsWithoutDeleted = await prisma.query.reviews({
+      where: {
+        AND: [
+          {
+            product: {
+              id: productReview.product.id,
+            },
+          },
+          { published: true },
+          { id_not: args.id },
+        ],
+      },
+    });
+
+    calcProductRating(
+      allReviewsWithoutDeleted.length === 0 ? false : allReviewsWithoutDeleted,
+      productReview.product.id,
+      0,
+      info,
+      0
+    );
+
     return prisma.mutation.deleteReview(
       {
         where: {
