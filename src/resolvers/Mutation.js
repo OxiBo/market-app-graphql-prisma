@@ -485,7 +485,7 @@ const Mutation = {
         "{ id count price }"
       );
 
-      // if one of the products unavailable this condition will stope the mutation all together
+      // TODO - if one of the products unavailable this condition will stop the mutation all together. This needs to be changed
       if (!productAvailable.length) {
         throw new Error("This product is not available");
       }
