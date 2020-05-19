@@ -1,12 +1,36 @@
 # import UserOrderByInput, SellerOrderByInput, ReviewOrderByInput, ProductOrderByInput, OrderOrderByInput from './generated/prisma.graphql'
 
 type Query {
-  users(query: String, first: Int, skip: Int, after: String, orderBy: UserOrderByInput): [User!]!
-  sellers(query: String, first: Int, skip: Int, after: String, orderBy: SellerOrderByInput): [Seller!]!
-  products(query: String, first: Int, skip: Int, after: String, orderBy: ProductOrderByInput): [Product!]!
+  users(
+    query: String
+    first: Int
+    skip: Int
+    after: String
+    orderBy: UserOrderByInput
+  ): [User!]!
+  sellers(
+    query: String
+    first: Int
+    skip: Int
+    after: String
+    orderBy: SellerOrderByInput
+  ): [Seller!]!
+  products(
+    query: String
+    first: Int
+    skip: Int
+    after: String
+    orderBy: ProductOrderByInput
+  ): [Product!]!
   meUser: User!
   meSeller: Seller!
-  reviews(first: Int, skip: Int, after: String, orderBy: ReviewOrderByInput): [Review!]!
+  reviews(
+    first: Int
+    skip: Int
+    after: String
+    orderBy: ReviewOrderByInput
+  ): [Review!]!
+  myReviews: [Review!]!
 }
 
 type Mutation {
@@ -24,6 +48,7 @@ type Mutation {
   createReview(data: CreateReviewInput!): Review!
   updateReview(id: ID!, data: UpdateReviewInput!): Review!
   deleteReview(id: ID!): Review!
+  createOrder(data: CreateOrderInput!): Order!
 }
 
 enum UserType {
@@ -141,8 +166,8 @@ type Order {
 
 input CreateOrderInput {
   products: [ID!]!
-  total: Float!
-  #   user: ID!
+  # total: Float! will be calculated in mutation
+  # user: User! user will have to be logged it, we get the id from getUser.js
 }
 
 type Review {
@@ -160,8 +185,9 @@ input CreateReviewInput {
   product: ID!
   published: Boolean!
 }
-input UpdateReviewInput{
- text: String
- rating: Int
- published: Boolean
+input UpdateReviewInput {
+  text: String
+  rating: Int
+  published: Boolean
 }
+

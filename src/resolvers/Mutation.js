@@ -464,6 +464,44 @@ const Mutation = {
       info
     );
   },
+
+  async createOrder(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    const foundUser = await prisma.exists.User({
+      id: userId,
+    });
+    if (!foundUser) {
+      throw new Error("You have to be logged in user to make an order");
+    }
+    let total = 0;
+    const products = args.data.products.filter((productId) => {
+      const productAvailable = prisma.query.products({
+        where: {
+          AND: [{ id: productId }, { count_gt: 0 }],
+        },
+      });
+
+      // if one of the products unavailable this condition will stope the mutation all together
+      if (!productAvailable) {
+        throw new Error("This product is not available");
+      }
+      total += productAvailable.price;
+      const connectedProduct = { connect: { id: productId } };
+      return productAvailable ? connectedProduct : false;
+    });
+
+    return prisma.mutation.createOrder({
+      data: {
+        total,
+        products,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+    });
+  },
 };
 
 export default Mutation;

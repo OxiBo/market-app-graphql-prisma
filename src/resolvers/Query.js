@@ -111,7 +111,7 @@ const Query = {
   //     },
   //   },
 
-  reviews(parent, args, { prisma, request }, info) {
+  reviews(parent, args, { prisma }, info) {
     const opArgs = {
       first: args.first,
       skip: args.skip,
@@ -119,6 +119,23 @@ const Query = {
       orderBy: args.orderBy,
       where: {
         published: true,
+      },
+    };
+
+    return prisma.query.reviews(opArgs, info);
+  },
+  myReviews(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+
+    const opArgs = {
+      first: args.first,
+      skip: args.skip,
+      after: args.after,
+      orderBy: args.orderBy,
+      where: {
+        user: {
+          id: userId,
+        },
       },
     };
 
