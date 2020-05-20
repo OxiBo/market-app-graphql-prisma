@@ -474,8 +474,10 @@ const Mutation = {
       throw new Error("You have to be logged in user to make an order");
     }
     let total = 0;
-    const products = await args.data.products.filter(async (productId) => {
-     console.log(total)
+
+    // using reduce with promises -  https://stackoverflow.com/questions/41243468/javascript-array-reduce-with-async-await   and about reduce again https://www.freecodecamp.org/forum/t/how-to-use-javascript-array-prototype-reduce-reduce-conceptual-boilerplate-for-problems-on-arrays/14687
+    const products = await args.data.products.reduce(async (acc, productId) => {
+      const accumulator = await acc;
       const productAvailable = await prisma.query.products(
         {
           where: {
@@ -489,14 +491,13 @@ const Mutation = {
       if (!productAvailable.length) {
         throw new Error("This product is not available");
       }
-      // console.log(productAvailable)
-      total += productAvailable[0].price;
-      console.log(total);
-     
-      return productAvailable ? { id: productId } : false;
-    });
 
-    console.log("total is " + total);
+      if (productAvailable) {
+        total += productAvailable[0].price;
+        accumulator.push({ id: productId });
+        return Promise.resolve(accumulator);
+      }
+    }, Promise.resolve([]));
 
     return prisma.mutation.createOrder({
       data: {
@@ -504,7 +505,7 @@ const Mutation = {
         products: {
           connect: products.map((product) => {
             // console.log(product)
-            return { id: product };
+            return product;
           }),
         },
         user: {
