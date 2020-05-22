@@ -31,7 +31,13 @@ type Query {
     orderBy: ReviewOrderByInput
   ): [Review!]!
   myReviews: [Review!]!
-  orders: [Order!]!
+  myOrders(
+    query: String
+    first: Int
+    skip: Int
+    after: String
+    orderBy: OrderOrderByInput
+  ): [Order!]!
 }
 
 type Mutation {
@@ -52,6 +58,11 @@ type Mutation {
   createOrder(data: CreateOrderInput!): Order!
   deleteOrder(id: ID!): Order!
 }
+
+# type Subscription{
+#   product: ProductSubscriptionPayload!
+
+# }
 
 enum UserType {
   BUYER
@@ -149,6 +160,8 @@ input CreateProductInput {
   department: String!
   price: Float!
   count: Int!
+  rating: Float! = 0 
+  # https://stackoverflow.com/questions/51563960/how-to-add-default-values-to-input-arguments-in-graphql
   #   seller: ID!
 }
 
@@ -192,4 +205,3 @@ input UpdateReviewInput {
   rating: Int
   published: Boolean
 }
-

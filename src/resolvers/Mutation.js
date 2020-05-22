@@ -211,7 +211,7 @@ const Mutation = {
       {
         data: {
           ...args.data,
-          rating: 0,
+          // rating: 0,
           seller: {
             connect: {
               id: sellerId,

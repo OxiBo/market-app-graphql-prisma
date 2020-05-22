@@ -141,15 +141,31 @@ const Query = {
 
     return prisma.query.reviews(opArgs, info);
   },
-  orders(parent, args, { prisma, request }, info) {
+  myOrders(parent, args, { prisma, request }, info) {
+    const opArgs = {
+      first: args.first,
+      skip: args.skip,
+      after: args.after,
+      orderBy: args.orderBy,
+    };
+    console.log(args)
     const userId = getUserId(request);
-    return prisma.query.orders({
-      where: {
-        user: {
-          id: userId,
+    opArgs.where = {
+      AND: [
+        {
+          user: {
+            id: userId,
+          },
         },
-      },
-    }, info);
+        {
+          products_some: {
+            name_contains: args.query,
+          },
+        },
+      ],
+    };
+
+    return prisma.query.orders(opArgs, info);
   },
 };
 
