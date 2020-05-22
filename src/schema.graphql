@@ -31,6 +31,7 @@ type Query {
     orderBy: ReviewOrderByInput
   ): [Review!]!
   myReviews: [Review!]!
+  orders: [Order!]!
 }
 
 type Mutation {
@@ -49,6 +50,7 @@ type Mutation {
   updateReview(id: ID!, data: UpdateReviewInput!): Review!
   deleteReview(id: ID!): Review!
   createOrder(data: CreateOrderInput!): Order!
+  deleteOrder(id: ID!): Order!
 }
 
 enum UserType {

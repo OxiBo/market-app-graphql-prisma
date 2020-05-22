@@ -29,7 +29,7 @@ type Product {
   department: String!
   count: Int!
   price: Float!
-  rating: Float!
+  rating: Float!@default(false)
   createdAt: DateTime!@createdAt
   updatedAt: DateTime!@updatedAt
   seller: Seller!@relation(name: "SellerToProduct", onDelete: SET_NULL)

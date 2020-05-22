@@ -74,7 +74,7 @@ const Query = {
   //         return prisma.query.products(opArgs, info);
   //       },
   //   },
-
+  // TODO - show only products which count is more than 0
   products(parent, args, { prisma }, info) {
     const opArgs = {
       first: args.first,
@@ -140,6 +140,16 @@ const Query = {
     };
 
     return prisma.query.reviews(opArgs, info);
+  },
+  orders(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    return prisma.query.orders({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+    }, info);
   },
 };
 

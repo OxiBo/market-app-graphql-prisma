@@ -117,7 +117,7 @@ const Mutation = {
     });
 
     if (!sellerExists) {
-      throw new Error("User not found");
+      throw new Error("Seller not found");
     }
 
     const isPasswordMatch = await bcrypt.compare(
@@ -211,6 +211,7 @@ const Mutation = {
       {
         data: {
           ...args.data,
+          rating: 0,
           seller: {
             connect: {
               id: sellerId,
@@ -475,7 +476,7 @@ const Mutation = {
     }
     let total = 0;
 
-    // using reduce with promises -  https://stackoverflow.com/questions/41243468/javascript-array-reduce-with-async-await   and about reduce again https://www.freecodecamp.org/forum/t/how-to-use-javascript-array-prototype-reduce-reduce-conceptual-boilerplate-for-problems-on-arrays/14687
+    // using reduce with promises -  https://stackoverflow.com/questions/41243468/javascript-array-reduce-with-async-await   and about reduce() again https://www.freecodecamp.org/forum/t/how-to-use-javascript-array-prototype-reduce-reduce-conceptual-boilerplate-for-problems-on-arrays/14687
     const products = await args.data.products.reduce(async (acc, productId) => {
       const accumulator = await acc;
       const productAvailable = await prisma.query.products(
@@ -515,6 +516,27 @@ const Mutation = {
         },
       },
     });
+  },
+  async deleteOrder(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    const foundOrder = await prisma.exists.Order({
+      id: args.id,
+      user: {
+        id: userId,
+      },
+    });
+    if (!foundOrder) {
+      throw new Error("Order not found");
+    }
+
+    return prisma.mutation.deleteOrder(
+      {
+        where: {
+          id: args.id,
+        },
+      },
+      info
+    );
   },
 };
 
