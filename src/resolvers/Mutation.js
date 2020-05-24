@@ -205,7 +205,7 @@ const Mutation = {
     });
 
     if (isUniqueName.length) {
-      throw new Error("You have a product with this name already");
+      throw new Error("You have a product with the same name already");
     }
     return prisma.mutation.createProduct(
       {
@@ -223,24 +223,6 @@ const Mutation = {
     );
   },
   async updateProduct(parent, args, { prisma, request }, info) {
-    if (args.data.rating) {
-      const userId = getUserId(request);
-      const userExists = await prisma.exists.User({
-        id: userId,
-      });
-      if (!userExists) {
-        throw new Error("You have to be logged in User to do that");
-      }
-    } else {
-      const sellerId = getUserId(request);
-      const sellerExists = await prisma.exists.Seller({
-        id: sellerId,
-      });
-      if (!sellerExists) {
-        throw new Error("You have to be a seller to update the product");
-      }
-    }
-
     const productExists = await prisma.exists.Product({
       id: args.id,
 
@@ -252,8 +234,35 @@ const Mutation = {
     if (!productExists) {
       throw new Error("Product not found");
     }
+    // TODO - change stock count when create Order
+    const userId = getUserId(request);
+    // check if the user is a buyer
+    const userExists = await prisma.exists.User({
+      id: userId,
+    });
+    if (args.data.rating) {
+      // const userId = getUserId(request);
+      // const userExists = await prisma.exists.User({
+      //   id: userId,
+      // });
+      if (!userExists) {
+        throw new Error("You have to be logged in User to do that");
+      }
+    } else if (userExists && args.data.stock) {
+    } else {
+      const sellerId = getUserId(request);
+      const sellerExists = await prisma.exists.Seller({
+        id: sellerId,
+      });
+      if (args.data.stock && (!userExists || !sellerExists)) {
+        throw new Error("You cannot update the product stock count");
+      }
+      if (!sellerExists) {
+        throw new Error("You have to be a seller to update the product");
+      }
+    }
 
-    if (args.data.count && args.data.count < 0) {
+    if (args.data.stock && args.data.stock < 0) {
       throw new Error("Product count has to be 0 or more");
     }
 
@@ -476,16 +485,17 @@ const Mutation = {
     }
     let total = 0;
 
+    console.log(JSON.stringify(args, null, 3));
     // using reduce with promises -  https://stackoverflow.com/questions/41243468/javascript-array-reduce-with-async-await   and about reduce() again https://www.freecodecamp.org/forum/t/how-to-use-javascript-array-prototype-reduce-reduce-conceptual-boilerplate-for-problems-on-arrays/14687
-    const products = await args.data.products.reduce(async (acc, productId) => {
+    const products = await args.data.products.reduce(async (acc, item) => {
       const accumulator = await acc;
       const productAvailable = await prisma.query.products(
         {
           where: {
-            AND: [{ id: productId }, { count_gt: 0 }],
+            AND: [{ id: item.product }, { stock_gte: item.count }],
           },
         },
-        "{ id count price }"
+        "{ id stock price }"
       );
 
       // TODO - if one of the products unavailable this condition will stop the mutation all together. This needs to be changed
@@ -493,13 +503,14 @@ const Mutation = {
         throw new Error("This product is not available");
       }
 
-      if (productAvailable) {
-        total += productAvailable[0].price;
-        accumulator.push({ id: productId });
-        return Promise.resolve(accumulator);
-      }
+        if (productAvailable) {
+          total += productAvailable[0].price * item.count;
+          accumulator.push({ id: item.product });
+          return Promise.resolve(accumulator);
+        }
     }, Promise.resolve([]));
-
+console.log(products)
+    // return {};
     return prisma.mutation.createOrder({
       data: {
         total,
@@ -515,7 +526,7 @@ const Mutation = {
           },
         },
       },
-    });
+    }, info);
   },
   async deleteOrder(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);

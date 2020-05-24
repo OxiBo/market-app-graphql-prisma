@@ -116,7 +116,7 @@ type Seller {
   email: String
   password: String!
   products: [Product!]!
-  orders: [Order!]!
+  # orders: [Order!]!
   type: SellerType!
 }
 
@@ -148,10 +148,12 @@ type Product {
   name: String!
   department: String!
   price: Float!
-  count: Int!
+  count: Int
   rating: Float!
+  stock: Int!
   seller: Seller!
   reviews: [Review!]!
+  # TODO - need to work on this
   orders: [Order!]!
 }
 
@@ -159,8 +161,9 @@ input CreateProductInput {
   name: String!
   department: String!
   price: Float!
-  count: Int!
-  rating: Float! = 0 
+  # count: Int!
+  rating: Float! = 0
+  stock: Int!
   # https://stackoverflow.com/questions/51563960/how-to-add-default-values-to-input-arguments-in-graphql
   #   seller: ID!
 }
@@ -169,21 +172,37 @@ input UpdateProductInput {
   name: String
   department: String
   price: Float
-  count: Int
+  stock: Int
+  # count: Int
 }
 
 type Order {
   id: ID!
+  # products: [Product!]!
   products: [Product!]!
   total: Float!
   user: User!
 }
 
 input CreateOrderInput {
-  products: [ID!]!
+  products: [OrderItemInput!]!
+
+  # products: [OrderItem!]!
+  # products: [ID!]!
   # total: Float! will be calculated in mutation
   # user: User! user will have to be logged it, we get the id from getUser.js
 }
+
+input OrderItemInput {
+  product: ID!
+  count: Int! = 1
+}
+
+# type OrderItem{
+#   id: ID!
+#   product: Product!
+#   count: Int!
+# }
 
 type Review {
   id: ID!

@@ -20,20 +20,21 @@ type Seller {
     createdAt: DateTime!@createdAt
     updatedAt: DateTime!@updatedAt
     products: [Product!]! @relation(name: "SellerToProduct", onDelete: CASCADE)
-    orders: [Order!]!@relation(name: "SellerToOrder", onDelete: SET_NULL)
 }
 
 type Product {
   id: ID! @id
   name: String!
   department: String!
-  count: Int!
+  count: Int
+  stock: Int!
   price: Float!
   rating: Float!@default(value: 0)
   createdAt: DateTime!@createdAt
   updatedAt: DateTime!@updatedAt
   seller: Seller!@relation(name: "SellerToProduct", onDelete: SET_NULL)
   reviews: [Review!]! @relation(name: "ReviewToProduct", onDelete: CASCADE)
+  orders: [Order!]!@relation(name: "ProductToOrder", onDelete: SET_NULL)
 }
 
 type Order {
@@ -44,6 +45,8 @@ type Order {
   createdAt: DateTime! @createdAt
   updatedAt: DateTime!@updatedAt
 }
+
+
 
 type Review {
  id: ID! @id

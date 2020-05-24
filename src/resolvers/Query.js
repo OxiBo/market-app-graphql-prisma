@@ -148,7 +148,7 @@ const Query = {
       after: args.after,
       orderBy: args.orderBy,
     };
-    console.log(args)
+    console.log(args);
     const userId = getUserId(request);
     opArgs.where = {
       AND: [

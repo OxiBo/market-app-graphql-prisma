@@ -14,6 +14,7 @@ const calcProductRating = async (reviewList, productId, newRate, info, add) => {
           ); // https://www.jacklmoore.com/notes/rounding-in-javascript/
   }
 
+  // TODO - refactor it to call this mutation in Review mutations ???
   await prisma.mutation.updateProduct(
     {
       where: {
