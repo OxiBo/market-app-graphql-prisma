@@ -8,6 +8,7 @@ type User {
     createdAt: DateTime!@createdAt
     updatedAt: DateTime!@updatedAt
     orders: [Order!]! @relation(name: "OrderToUser", onDelete: CASCADE)
+    orderItems: [OrderItem!]!@relation(name: "OrderItemToUser", onDelete: SET_NULL)
     reviews: [Review!]!@relation(name: "ReviewToUser", onDelete: CASCADE)
 }
 
@@ -50,6 +51,8 @@ type OrderItem {
   id: ID! @id
   product: Product!@relation(name: "ProductToOrderItem", onDelete: SET_NULL)
   count: Int!
+  price: Float!
+  user: User!@relation(name: "OrderItemToUser", onDelete: SET_NULL)
   createdAt: DateTime! @createdAt
   updatedAt: DateTime!@updatedAt
 }

@@ -40,6 +40,7 @@ type Query {
   ): [Order!]!
   orderItems(query: String): [OrderItem!]!
   myOrdersItems(query: String): [OrderItem!]!
+  orderItem(query: String):[OrderItem!]!
 }
 
 type Mutation {
@@ -85,6 +86,7 @@ type User {
   orders: [Order!]!
   reviews: [Review!]!
   type: UserType!
+  orderItems: [OrderItem!]!
 }
 
 input CreateUserInput {
@@ -201,7 +203,9 @@ items: [OrderItemInput!]!
 type OrderItem{
   id: ID!
   product: Product!
+  price: Float!
   count: Int!
+  user: User!
 }
 
 input OrderItemInput {

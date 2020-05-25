@@ -1,5 +1,5 @@
 # source: http://localhost:4466/market
-# timestamp: Sun May 24 2020 22:12:13 GMT-0400 (EDT)
+# timestamp: Mon May 25 2020 16:29:37 GMT-0400 (EDT)
 
 type AggregateOrder {
   count: Int!
@@ -143,6 +143,8 @@ type OrderItem implements Node {
   id: ID!
   product: Product!
   count: Int!
+  price: Float!
+  user: User!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -160,7 +162,9 @@ type OrderItemConnection {
 input OrderItemCreateInput {
   id: ID
   count: Int!
+  price: Float!
   product: ProductCreateOneWithoutOrderItemInput!
+  user: UserCreateOneWithoutOrderItemsInput!
 }
 
 input OrderItemCreateManyInput {
@@ -173,9 +177,23 @@ input OrderItemCreateManyWithoutProductInput {
   connect: [OrderItemWhereUniqueInput!]
 }
 
+input OrderItemCreateManyWithoutUserInput {
+  create: [OrderItemCreateWithoutUserInput!]
+  connect: [OrderItemWhereUniqueInput!]
+}
+
 input OrderItemCreateWithoutProductInput {
   id: ID
   count: Int!
+  price: Float!
+  user: UserCreateOneWithoutOrderItemsInput!
+}
+
+input OrderItemCreateWithoutUserInput {
+  id: ID
+  count: Int!
+  price: Float!
+  product: ProductCreateOneWithoutOrderItemInput!
 }
 
 """An edge in a connection."""
@@ -192,6 +210,8 @@ enum OrderItemOrderByInput {
   id_DESC
   count_ASC
   count_DESC
+  price_ASC
+  price_DESC
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
@@ -201,6 +221,7 @@ enum OrderItemOrderByInput {
 type OrderItemPreviousValues {
   id: ID!
   count: Int!
+  price: Float!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -276,6 +297,28 @@ input OrderItemScalarWhereInput {
 
   """All values greater than or equal the given value."""
   count_gte: Int
+  price: Float
+
+  """All values that are not equal to given value."""
+  price_not: Float
+
+  """All values that are contained in given list."""
+  price_in: [Float!]
+
+  """All values that are not contained in given list."""
+  price_not_in: [Float!]
+
+  """All values less than the given value."""
+  price_lt: Float
+
+  """All values less than or equal the given value."""
+  price_lte: Float
+
+  """All values greater than the given value."""
+  price_gt: Float
+
+  """All values greater than or equal the given value."""
+  price_gte: Float
   createdAt: DateTime
 
   """All values that are not equal to given value."""
@@ -361,16 +404,21 @@ input OrderItemSubscriptionWhereInput {
 
 input OrderItemUpdateDataInput {
   count: Int
+  price: Float
   product: ProductUpdateOneRequiredWithoutOrderItemInput
+  user: UserUpdateOneRequiredWithoutOrderItemsInput
 }
 
 input OrderItemUpdateInput {
   count: Int
+  price: Float
   product: ProductUpdateOneRequiredWithoutOrderItemInput
+  user: UserUpdateOneRequiredWithoutOrderItemsInput
 }
 
 input OrderItemUpdateManyDataInput {
   count: Int
+  price: Float
 }
 
 input OrderItemUpdateManyInput {
@@ -387,6 +435,7 @@ input OrderItemUpdateManyInput {
 
 input OrderItemUpdateManyMutationInput {
   count: Int
+  price: Float
 }
 
 input OrderItemUpdateManyWithoutProductInput {
@@ -401,6 +450,18 @@ input OrderItemUpdateManyWithoutProductInput {
   upsert: [OrderItemUpsertWithWhereUniqueWithoutProductInput!]
 }
 
+input OrderItemUpdateManyWithoutUserInput {
+  create: [OrderItemCreateWithoutUserInput!]
+  connect: [OrderItemWhereUniqueInput!]
+  set: [OrderItemWhereUniqueInput!]
+  disconnect: [OrderItemWhereUniqueInput!]
+  delete: [OrderItemWhereUniqueInput!]
+  update: [OrderItemUpdateWithWhereUniqueWithoutUserInput!]
+  updateMany: [OrderItemUpdateManyWithWhereNestedInput!]
+  deleteMany: [OrderItemScalarWhereInput!]
+  upsert: [OrderItemUpsertWithWhereUniqueWithoutUserInput!]
+}
+
 input OrderItemUpdateManyWithWhereNestedInput {
   where: OrderItemScalarWhereInput!
   data: OrderItemUpdateManyDataInput!
@@ -408,6 +469,14 @@ input OrderItemUpdateManyWithWhereNestedInput {
 
 input OrderItemUpdateWithoutProductDataInput {
   count: Int
+  price: Float
+  user: UserUpdateOneRequiredWithoutOrderItemsInput
+}
+
+input OrderItemUpdateWithoutUserDataInput {
+  count: Int
+  price: Float
+  product: ProductUpdateOneRequiredWithoutOrderItemInput
 }
 
 input OrderItemUpdateWithWhereUniqueNestedInput {
@@ -420,6 +489,11 @@ input OrderItemUpdateWithWhereUniqueWithoutProductInput {
   data: OrderItemUpdateWithoutProductDataInput!
 }
 
+input OrderItemUpdateWithWhereUniqueWithoutUserInput {
+  where: OrderItemWhereUniqueInput!
+  data: OrderItemUpdateWithoutUserDataInput!
+}
+
 input OrderItemUpsertWithWhereUniqueNestedInput {
   where: OrderItemWhereUniqueInput!
   update: OrderItemUpdateDataInput!
@@ -430,6 +504,12 @@ input OrderItemUpsertWithWhereUniqueWithoutProductInput {
   where: OrderItemWhereUniqueInput!
   update: OrderItemUpdateWithoutProductDataInput!
   create: OrderItemCreateWithoutProductInput!
+}
+
+input OrderItemUpsertWithWhereUniqueWithoutUserInput {
+  where: OrderItemWhereUniqueInput!
+  update: OrderItemUpdateWithoutUserDataInput!
+  create: OrderItemCreateWithoutUserInput!
 }
 
 input OrderItemWhereInput {
@@ -503,6 +583,28 @@ input OrderItemWhereInput {
 
   """All values greater than or equal the given value."""
   count_gte: Int
+  price: Float
+
+  """All values that are not equal to given value."""
+  price_not: Float
+
+  """All values that are contained in given list."""
+  price_in: [Float!]
+
+  """All values that are not contained in given list."""
+  price_not_in: [Float!]
+
+  """All values less than the given value."""
+  price_lt: Float
+
+  """All values less than or equal the given value."""
+  price_lte: Float
+
+  """All values greater than the given value."""
+  price_gt: Float
+
+  """All values greater than or equal the given value."""
+  price_gte: Float
   createdAt: DateTime
 
   """All values that are not equal to given value."""
@@ -548,6 +650,7 @@ input OrderItemWhereInput {
   """All values greater than or equal the given value."""
   updatedAt_gte: DateTime
   product: ProductWhereInput
+  user: UserWhereInput
 }
 
 input OrderItemWhereUniqueInput {
@@ -2736,6 +2839,7 @@ type User implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   orders(where: OrderWhereInput, orderBy: OrderOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Order!]
+  orderItems(where: OrderItemWhereInput, orderBy: OrderItemOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [OrderItem!]
   reviews(where: ReviewWhereInput, orderBy: ReviewOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Review!]
 }
 
@@ -2757,7 +2861,13 @@ input UserCreateInput {
   age: Int
   type: String!
   orders: OrderCreateManyWithoutUserInput
+  orderItems: OrderItemCreateManyWithoutUserInput
   reviews: ReviewCreateManyWithoutUserInput
+}
+
+input UserCreateOneWithoutOrderItemsInput {
+  create: UserCreateWithoutOrderItemsInput
+  connect: UserWhereUniqueInput
 }
 
 input UserCreateOneWithoutOrdersInput {
@@ -2770,6 +2880,17 @@ input UserCreateOneWithoutReviewsInput {
   connect: UserWhereUniqueInput
 }
 
+input UserCreateWithoutOrderItemsInput {
+  id: ID
+  name: String!
+  email: String!
+  password: String!
+  age: Int
+  type: String!
+  orders: OrderCreateManyWithoutUserInput
+  reviews: ReviewCreateManyWithoutUserInput
+}
+
 input UserCreateWithoutOrdersInput {
   id: ID
   name: String!
@@ -2777,6 +2898,7 @@ input UserCreateWithoutOrdersInput {
   password: String!
   age: Int
   type: String!
+  orderItems: OrderItemCreateManyWithoutUserInput
   reviews: ReviewCreateManyWithoutUserInput
 }
 
@@ -2788,6 +2910,7 @@ input UserCreateWithoutReviewsInput {
   age: Int
   type: String!
   orders: OrderCreateManyWithoutUserInput
+  orderItems: OrderItemCreateManyWithoutUserInput
 }
 
 """An edge in a connection."""
@@ -2873,6 +2996,7 @@ input UserUpdateInput {
   age: Int
   type: String
   orders: OrderUpdateManyWithoutUserInput
+  orderItems: OrderItemUpdateManyWithoutUserInput
   reviews: ReviewUpdateManyWithoutUserInput
 }
 
@@ -2882,6 +3006,13 @@ input UserUpdateManyMutationInput {
   password: String
   age: Int
   type: String
+}
+
+input UserUpdateOneRequiredWithoutOrderItemsInput {
+  create: UserCreateWithoutOrderItemsInput
+  connect: UserWhereUniqueInput
+  update: UserUpdateWithoutOrderItemsDataInput
+  upsert: UserUpsertWithoutOrderItemsInput
 }
 
 input UserUpdateOneRequiredWithoutOrdersInput {
@@ -2898,12 +3029,23 @@ input UserUpdateOneRequiredWithoutReviewsInput {
   upsert: UserUpsertWithoutReviewsInput
 }
 
+input UserUpdateWithoutOrderItemsDataInput {
+  name: String
+  email: String
+  password: String
+  age: Int
+  type: String
+  orders: OrderUpdateManyWithoutUserInput
+  reviews: ReviewUpdateManyWithoutUserInput
+}
+
 input UserUpdateWithoutOrdersDataInput {
   name: String
   email: String
   password: String
   age: Int
   type: String
+  orderItems: OrderItemUpdateManyWithoutUserInput
   reviews: ReviewUpdateManyWithoutUserInput
 }
 
@@ -2914,6 +3056,12 @@ input UserUpdateWithoutReviewsDataInput {
   age: Int
   type: String
   orders: OrderUpdateManyWithoutUserInput
+  orderItems: OrderItemUpdateManyWithoutUserInput
+}
+
+input UserUpsertWithoutOrderItemsInput {
+  update: UserUpdateWithoutOrderItemsDataInput!
+  create: UserCreateWithoutOrderItemsInput!
 }
 
 input UserUpsertWithoutOrdersInput {
@@ -3204,6 +3352,9 @@ input UserWhereInput {
   orders_every: OrderWhereInput
   orders_some: OrderWhereInput
   orders_none: OrderWhereInput
+  orderItems_every: OrderItemWhereInput
+  orderItems_some: OrderItemWhereInput
+  orderItems_none: OrderItemWhereInput
   reviews_every: ReviewWhereInput
   reviews_some: ReviewWhereInput
   reviews_none: ReviewWhereInput

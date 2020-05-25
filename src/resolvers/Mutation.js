@@ -475,21 +475,50 @@ const Mutation = {
     );
   },
 
-  createOrderItem(parent, args, { prisma }, info) {
-    return prisma.mutation.createOrderItem(
-      {
-        data: {
-          count: args.count,
-          product: {
-            connect: {
-              id: args.product,
-            },
-          },
-        },
-      },
-      info
-    );
-  },
+  // async createOrderItem(parent, args, { prisma, request }, info) {
+  //   const userId = getUserId(request);
+
+
+  //   const isProductAvailable = await prisma.query.products(
+  //     {
+  //       where: {
+  //         AND: [{ id: args.data.product }, { stock_gte: args.data.count }],
+  //       },
+  //     },
+  //     "{ id stock price }"
+  //   );
+  //   console.log(JSON.stringify(args, null, 3))
+
+  //   console.log(isProductAvailable)
+
+  //   // TODO - if one of the products unavailable this condition will stop the mutation all together. This needs to be changed
+  //   if (!isProductAvailable.length) {
+  //     throw new Error(
+  //       `Product with id ${args.data.product} or the amount of the items is not available`
+  //     ); // TODO -  this needs to be changed
+  //   }
+
+
+  //   return prisma.mutation.createOrderItem(
+  //     {
+  //       data: {
+  //         count: args.data.count,
+  //         price: isProductAvailable[0].price,// ?????
+  //         product: {
+  //           connect: {
+  //             id: args.product,
+  //           },
+  //         },
+  //         user: {
+  //           connect: {
+  //             id: userId,
+  //           },
+  //         },
+  //       },
+  //     },
+  //     info
+  //   );
+  // },
   async createOrder(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);
     const foundUser = await prisma.exists.User({
@@ -516,7 +545,9 @@ const Mutation = {
 
       // TODO - if one of the products unavailable this condition will stop the mutation all together. This needs to be changed
       if (!productAvailable.length) {
-        throw new Error(`Product with id ${item.product} or the amount of the products is not available`); // TODO -  this needs to be changed
+        throw new Error(
+          `Product with id ${item.product} or the amount of the products is not available`
+        ); // TODO -  this needs to be changed
       }
 
       if (productAvailable) {
@@ -524,9 +555,15 @@ const Mutation = {
           {
             data: {
               count: item.count,
+              price: productAvailable[0].price,
               product: {
                 connect: {
                   id: item.product,
+                },
+              },
+              user: {
+                connect: {
+                  id: userId,
                 },
               },
             },

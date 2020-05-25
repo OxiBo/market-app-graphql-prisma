@@ -148,7 +148,7 @@ const Query = {
       after: args.after,
       orderBy: args.orderBy,
     };
-    console.log(args);
+    // console.log(args);
     const userId = getUserId(request);
     opArgs.where = {
       AND: [
@@ -177,7 +177,7 @@ const Query = {
       after: args.after,
       orderBy: args.orderBy,
     };
-    console.log(args);
+    // console.log(args);
     const userId = getUserId(request);
     opArgs.where = {
       AND: [
@@ -187,16 +187,47 @@ const Query = {
           },
         },
         {
-          items_some: {
-            product: {
-              name_contains: args.query,
-            },
+          product: {
+            name_contains: args.query,
           },
         },
       ],
     };
 
-    return prisma.query.orders(opArgs, info)
+    return prisma.query.orderItems(opArgs, info);
+  },
+  async orderItems(parent, args, { prisma, request }, info) {
+    const sellerId = getUserId(request);
+    const opArgs = {
+      first: args.first,
+      skip: args.skip,
+      after: args.after,
+      orderBy: args.orderBy,
+      where: {
+        product: {
+          AND: [
+            {
+              seller: {
+                id: sellerId,
+              },
+            },
+          ],
+        },
+      },
+    };
+    if (args.query) {
+      const productExists = await prisma.exists.Product({
+        id: args.query,
+      });
+
+      if (!productExists) {
+        throw new Error("Product not found");
+      }
+
+      opArgs.where.product.AND.push({ id: args.query });
+    }
+    // console.log(JSON.stringify(opArgs, null, 2));
+    return prisma.query.orderItems(opArgs, info);
   },
 };
 
