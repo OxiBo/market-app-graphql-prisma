@@ -1,7 +1,11 @@
 # source: http://localhost:4466/market
-# timestamp: Sat May 23 2020 23:31:51 GMT-0400 (EDT)
+# timestamp: Sun May 24 2020 22:12:13 GMT-0400 (EDT)
 
 type AggregateOrder {
+  count: Int!
+}
+
+type AggregateOrderItem {
   count: Int!
 }
 
@@ -43,31 +47,37 @@ type Mutation {
   createProduct(data: ProductCreateInput!): Product!
   createOrder(data: OrderCreateInput!): Order!
   createReview(data: ReviewCreateInput!): Review!
+  createOrderItem(data: OrderItemCreateInput!): OrderItem!
   updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
   updateSeller(data: SellerUpdateInput!, where: SellerWhereUniqueInput!): Seller
   updateProduct(data: ProductUpdateInput!, where: ProductWhereUniqueInput!): Product
   updateOrder(data: OrderUpdateInput!, where: OrderWhereUniqueInput!): Order
   updateReview(data: ReviewUpdateInput!, where: ReviewWhereUniqueInput!): Review
+  updateOrderItem(data: OrderItemUpdateInput!, where: OrderItemWhereUniqueInput!): OrderItem
   deleteUser(where: UserWhereUniqueInput!): User
   deleteSeller(where: SellerWhereUniqueInput!): Seller
   deleteProduct(where: ProductWhereUniqueInput!): Product
   deleteOrder(where: OrderWhereUniqueInput!): Order
   deleteReview(where: ReviewWhereUniqueInput!): Review
+  deleteOrderItem(where: OrderItemWhereUniqueInput!): OrderItem
   upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
   upsertSeller(where: SellerWhereUniqueInput!, create: SellerCreateInput!, update: SellerUpdateInput!): Seller!
   upsertProduct(where: ProductWhereUniqueInput!, create: ProductCreateInput!, update: ProductUpdateInput!): Product!
   upsertOrder(where: OrderWhereUniqueInput!, create: OrderCreateInput!, update: OrderUpdateInput!): Order!
   upsertReview(where: ReviewWhereUniqueInput!, create: ReviewCreateInput!, update: ReviewUpdateInput!): Review!
+  upsertOrderItem(where: OrderItemWhereUniqueInput!, create: OrderItemCreateInput!, update: OrderItemUpdateInput!): OrderItem!
   updateManyUsers(data: UserUpdateManyMutationInput!, where: UserWhereInput): BatchPayload!
   updateManySellers(data: SellerUpdateManyMutationInput!, where: SellerWhereInput): BatchPayload!
   updateManyProducts(data: ProductUpdateManyMutationInput!, where: ProductWhereInput): BatchPayload!
   updateManyOrders(data: OrderUpdateManyMutationInput!, where: OrderWhereInput): BatchPayload!
   updateManyReviews(data: ReviewUpdateManyMutationInput!, where: ReviewWhereInput): BatchPayload!
+  updateManyOrderItems(data: OrderItemUpdateManyMutationInput!, where: OrderItemWhereInput): BatchPayload!
   deleteManyUsers(where: UserWhereInput): BatchPayload!
   deleteManySellers(where: SellerWhereInput): BatchPayload!
   deleteManyProducts(where: ProductWhereInput): BatchPayload!
   deleteManyOrders(where: OrderWhereInput): BatchPayload!
   deleteManyReviews(where: ReviewWhereInput): BatchPayload!
+  deleteManyOrderItems(where: OrderItemWhereInput): BatchPayload!
   executeRaw(database: PrismaDatabase, query: String!): Json!
 }
 
@@ -85,7 +95,7 @@ interface Node {
 
 type Order implements Node {
   id: ID!
-  products(where: ProductWhereInput, orderBy: ProductOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Product!]
+  items(where: OrderItemWhereInput, orderBy: OrderItemOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [OrderItem!]
   total: Float!
   user: User!
   createdAt: DateTime!
@@ -105,13 +115,8 @@ type OrderConnection {
 input OrderCreateInput {
   id: ID
   total: Float!
-  products: ProductCreateManyWithoutOrdersInput
+  items: OrderItemCreateManyInput
   user: UserCreateOneWithoutOrdersInput!
-}
-
-input OrderCreateManyWithoutProductsInput {
-  create: [OrderCreateWithoutProductsInput!]
-  connect: [OrderWhereUniqueInput!]
 }
 
 input OrderCreateManyWithoutUserInput {
@@ -119,16 +124,10 @@ input OrderCreateManyWithoutUserInput {
   connect: [OrderWhereUniqueInput!]
 }
 
-input OrderCreateWithoutProductsInput {
-  id: ID
-  total: Float!
-  user: UserCreateOneWithoutOrdersInput!
-}
-
 input OrderCreateWithoutUserInput {
   id: ID
   total: Float!
-  products: ProductCreateManyWithoutOrdersInput
+  items: OrderItemCreateManyInput
 }
 
 """An edge in a connection."""
@@ -138,6 +137,421 @@ type OrderEdge {
 
   """A cursor for use in pagination."""
   cursor: String!
+}
+
+type OrderItem implements Node {
+  id: ID!
+  product: Product!
+  count: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""A connection to a list of items."""
+type OrderItemConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [OrderItemEdge]!
+  aggregate: AggregateOrderItem!
+}
+
+input OrderItemCreateInput {
+  id: ID
+  count: Int!
+  product: ProductCreateOneWithoutOrderItemInput!
+}
+
+input OrderItemCreateManyInput {
+  create: [OrderItemCreateInput!]
+  connect: [OrderItemWhereUniqueInput!]
+}
+
+input OrderItemCreateManyWithoutProductInput {
+  create: [OrderItemCreateWithoutProductInput!]
+  connect: [OrderItemWhereUniqueInput!]
+}
+
+input OrderItemCreateWithoutProductInput {
+  id: ID
+  count: Int!
+}
+
+"""An edge in a connection."""
+type OrderItemEdge {
+  """The item at the end of the edge."""
+  node: OrderItem!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum OrderItemOrderByInput {
+  id_ASC
+  id_DESC
+  count_ASC
+  count_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+}
+
+type OrderItemPreviousValues {
+  id: ID!
+  count: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input OrderItemScalarWhereInput {
+  """Logical AND on all given filters."""
+  AND: [OrderItemScalarWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [OrderItemScalarWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [OrderItemScalarWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  count: Int
+
+  """All values that are not equal to given value."""
+  count_not: Int
+
+  """All values that are contained in given list."""
+  count_in: [Int!]
+
+  """All values that are not contained in given list."""
+  count_not_in: [Int!]
+
+  """All values less than the given value."""
+  count_lt: Int
+
+  """All values less than or equal the given value."""
+  count_lte: Int
+
+  """All values greater than the given value."""
+  count_gt: Int
+
+  """All values greater than or equal the given value."""
+  count_gte: Int
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+}
+
+type OrderItemSubscriptionPayload {
+  mutation: MutationType!
+  node: OrderItem
+  updatedFields: [String!]
+  previousValues: OrderItemPreviousValues
+}
+
+input OrderItemSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [OrderItemSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [OrderItemSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [OrderItemSubscriptionWhereInput!]
+
+  """The subscription event gets dispatched when it's listed in mutation_in"""
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: OrderItemWhereInput
+}
+
+input OrderItemUpdateDataInput {
+  count: Int
+  product: ProductUpdateOneRequiredWithoutOrderItemInput
+}
+
+input OrderItemUpdateInput {
+  count: Int
+  product: ProductUpdateOneRequiredWithoutOrderItemInput
+}
+
+input OrderItemUpdateManyDataInput {
+  count: Int
+}
+
+input OrderItemUpdateManyInput {
+  create: [OrderItemCreateInput!]
+  connect: [OrderItemWhereUniqueInput!]
+  set: [OrderItemWhereUniqueInput!]
+  disconnect: [OrderItemWhereUniqueInput!]
+  delete: [OrderItemWhereUniqueInput!]
+  update: [OrderItemUpdateWithWhereUniqueNestedInput!]
+  updateMany: [OrderItemUpdateManyWithWhereNestedInput!]
+  deleteMany: [OrderItemScalarWhereInput!]
+  upsert: [OrderItemUpsertWithWhereUniqueNestedInput!]
+}
+
+input OrderItemUpdateManyMutationInput {
+  count: Int
+}
+
+input OrderItemUpdateManyWithoutProductInput {
+  create: [OrderItemCreateWithoutProductInput!]
+  connect: [OrderItemWhereUniqueInput!]
+  set: [OrderItemWhereUniqueInput!]
+  disconnect: [OrderItemWhereUniqueInput!]
+  delete: [OrderItemWhereUniqueInput!]
+  update: [OrderItemUpdateWithWhereUniqueWithoutProductInput!]
+  updateMany: [OrderItemUpdateManyWithWhereNestedInput!]
+  deleteMany: [OrderItemScalarWhereInput!]
+  upsert: [OrderItemUpsertWithWhereUniqueWithoutProductInput!]
+}
+
+input OrderItemUpdateManyWithWhereNestedInput {
+  where: OrderItemScalarWhereInput!
+  data: OrderItemUpdateManyDataInput!
+}
+
+input OrderItemUpdateWithoutProductDataInput {
+  count: Int
+}
+
+input OrderItemUpdateWithWhereUniqueNestedInput {
+  where: OrderItemWhereUniqueInput!
+  data: OrderItemUpdateDataInput!
+}
+
+input OrderItemUpdateWithWhereUniqueWithoutProductInput {
+  where: OrderItemWhereUniqueInput!
+  data: OrderItemUpdateWithoutProductDataInput!
+}
+
+input OrderItemUpsertWithWhereUniqueNestedInput {
+  where: OrderItemWhereUniqueInput!
+  update: OrderItemUpdateDataInput!
+  create: OrderItemCreateInput!
+}
+
+input OrderItemUpsertWithWhereUniqueWithoutProductInput {
+  where: OrderItemWhereUniqueInput!
+  update: OrderItemUpdateWithoutProductDataInput!
+  create: OrderItemCreateWithoutProductInput!
+}
+
+input OrderItemWhereInput {
+  """Logical AND on all given filters."""
+  AND: [OrderItemWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [OrderItemWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [OrderItemWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  count: Int
+
+  """All values that are not equal to given value."""
+  count_not: Int
+
+  """All values that are contained in given list."""
+  count_in: [Int!]
+
+  """All values that are not contained in given list."""
+  count_not_in: [Int!]
+
+  """All values less than the given value."""
+  count_lt: Int
+
+  """All values less than or equal the given value."""
+  count_lte: Int
+
+  """All values greater than the given value."""
+  count_gt: Int
+
+  """All values greater than or equal the given value."""
+  count_gte: Int
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  product: ProductWhereInput
+}
+
+input OrderItemWhereUniqueInput {
+  id: ID
 }
 
 enum OrderOrderByInput {
@@ -314,7 +728,7 @@ input OrderSubscriptionWhereInput {
 
 input OrderUpdateInput {
   total: Float
-  products: ProductUpdateManyWithoutOrdersInput
+  items: OrderItemUpdateManyInput
   user: UserUpdateOneRequiredWithoutOrdersInput
 }
 
@@ -324,18 +738,6 @@ input OrderUpdateManyDataInput {
 
 input OrderUpdateManyMutationInput {
   total: Float
-}
-
-input OrderUpdateManyWithoutProductsInput {
-  create: [OrderCreateWithoutProductsInput!]
-  connect: [OrderWhereUniqueInput!]
-  set: [OrderWhereUniqueInput!]
-  disconnect: [OrderWhereUniqueInput!]
-  delete: [OrderWhereUniqueInput!]
-  update: [OrderUpdateWithWhereUniqueWithoutProductsInput!]
-  updateMany: [OrderUpdateManyWithWhereNestedInput!]
-  deleteMany: [OrderScalarWhereInput!]
-  upsert: [OrderUpsertWithWhereUniqueWithoutProductsInput!]
 }
 
 input OrderUpdateManyWithoutUserInput {
@@ -355,30 +757,14 @@ input OrderUpdateManyWithWhereNestedInput {
   data: OrderUpdateManyDataInput!
 }
 
-input OrderUpdateWithoutProductsDataInput {
-  total: Float
-  user: UserUpdateOneRequiredWithoutOrdersInput
-}
-
 input OrderUpdateWithoutUserDataInput {
   total: Float
-  products: ProductUpdateManyWithoutOrdersInput
-}
-
-input OrderUpdateWithWhereUniqueWithoutProductsInput {
-  where: OrderWhereUniqueInput!
-  data: OrderUpdateWithoutProductsDataInput!
+  items: OrderItemUpdateManyInput
 }
 
 input OrderUpdateWithWhereUniqueWithoutUserInput {
   where: OrderWhereUniqueInput!
   data: OrderUpdateWithoutUserDataInput!
-}
-
-input OrderUpsertWithWhereUniqueWithoutProductsInput {
-  where: OrderWhereUniqueInput!
-  update: OrderUpdateWithoutProductsDataInput!
-  create: OrderCreateWithoutProductsInput!
 }
 
 input OrderUpsertWithWhereUniqueWithoutUserInput {
@@ -502,9 +888,9 @@ input OrderWhereInput {
 
   """All values greater than or equal the given value."""
   updatedAt_gte: DateTime
-  products_every: ProductWhereInput
-  products_some: ProductWhereInput
-  products_none: ProductWhereInput
+  items_every: OrderItemWhereInput
+  items_some: OrderItemWhereInput
+  items_none: OrderItemWhereInput
   user: UserWhereInput
 }
 
@@ -538,12 +924,12 @@ type Product implements Node {
   count: Int
   stock: Int!
   price: Float!
+  orderItem(where: OrderItemWhereInput, orderBy: OrderItemOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [OrderItem!]
   rating: Float!
   createdAt: DateTime!
   updatedAt: DateTime!
   seller: Seller!
   reviews(where: ReviewWhereInput, orderBy: ReviewOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Review!]
-  orders(where: OrderWhereInput, orderBy: OrderOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Order!]
 }
 
 """A connection to a list of items."""
@@ -564,14 +950,9 @@ input ProductCreateInput {
   stock: Int!
   price: Float!
   rating: Float
+  orderItem: OrderItemCreateManyWithoutProductInput
   seller: SellerCreateOneWithoutProductsInput!
   reviews: ReviewCreateManyWithoutProductInput
-  orders: OrderCreateManyWithoutProductsInput
-}
-
-input ProductCreateManyWithoutOrdersInput {
-  create: [ProductCreateWithoutOrdersInput!]
-  connect: [ProductWhereUniqueInput!]
 }
 
 input ProductCreateManyWithoutSellerInput {
@@ -579,12 +960,17 @@ input ProductCreateManyWithoutSellerInput {
   connect: [ProductWhereUniqueInput!]
 }
 
+input ProductCreateOneWithoutOrderItemInput {
+  create: ProductCreateWithoutOrderItemInput
+  connect: ProductWhereUniqueInput
+}
+
 input ProductCreateOneWithoutReviewsInput {
   create: ProductCreateWithoutReviewsInput
   connect: ProductWhereUniqueInput
 }
 
-input ProductCreateWithoutOrdersInput {
+input ProductCreateWithoutOrderItemInput {
   id: ID
   name: String!
   department: String!
@@ -604,8 +990,8 @@ input ProductCreateWithoutReviewsInput {
   stock: Int!
   price: Float!
   rating: Float
+  orderItem: OrderItemCreateManyWithoutProductInput
   seller: SellerCreateOneWithoutProductsInput!
-  orders: OrderCreateManyWithoutProductsInput
 }
 
 input ProductCreateWithoutSellerInput {
@@ -616,8 +1002,8 @@ input ProductCreateWithoutSellerInput {
   stock: Int!
   price: Float!
   rating: Float
+  orderItem: OrderItemCreateManyWithoutProductInput
   reviews: ReviewCreateManyWithoutProductInput
-  orders: OrderCreateManyWithoutProductsInput
 }
 
 """An edge in a connection."""
@@ -969,9 +1355,9 @@ input ProductUpdateInput {
   stock: Int
   price: Float
   rating: Float
+  orderItem: OrderItemUpdateManyWithoutProductInput
   seller: SellerUpdateOneRequiredWithoutProductsInput
   reviews: ReviewUpdateManyWithoutProductInput
-  orders: OrderUpdateManyWithoutProductsInput
 }
 
 input ProductUpdateManyDataInput {
@@ -992,18 +1378,6 @@ input ProductUpdateManyMutationInput {
   rating: Float
 }
 
-input ProductUpdateManyWithoutOrdersInput {
-  create: [ProductCreateWithoutOrdersInput!]
-  connect: [ProductWhereUniqueInput!]
-  set: [ProductWhereUniqueInput!]
-  disconnect: [ProductWhereUniqueInput!]
-  delete: [ProductWhereUniqueInput!]
-  update: [ProductUpdateWithWhereUniqueWithoutOrdersInput!]
-  updateMany: [ProductUpdateManyWithWhereNestedInput!]
-  deleteMany: [ProductScalarWhereInput!]
-  upsert: [ProductUpsertWithWhereUniqueWithoutOrdersInput!]
-}
-
 input ProductUpdateManyWithoutSellerInput {
   create: [ProductCreateWithoutSellerInput!]
   connect: [ProductWhereUniqueInput!]
@@ -1021,6 +1395,13 @@ input ProductUpdateManyWithWhereNestedInput {
   data: ProductUpdateManyDataInput!
 }
 
+input ProductUpdateOneRequiredWithoutOrderItemInput {
+  create: ProductCreateWithoutOrderItemInput
+  connect: ProductWhereUniqueInput
+  update: ProductUpdateWithoutOrderItemDataInput
+  upsert: ProductUpsertWithoutOrderItemInput
+}
+
 input ProductUpdateOneRequiredWithoutReviewsInput {
   create: ProductCreateWithoutReviewsInput
   connect: ProductWhereUniqueInput
@@ -1028,7 +1409,7 @@ input ProductUpdateOneRequiredWithoutReviewsInput {
   upsert: ProductUpsertWithoutReviewsInput
 }
 
-input ProductUpdateWithoutOrdersDataInput {
+input ProductUpdateWithoutOrderItemDataInput {
   name: String
   department: String
   count: Int
@@ -1046,8 +1427,8 @@ input ProductUpdateWithoutReviewsDataInput {
   stock: Int
   price: Float
   rating: Float
+  orderItem: OrderItemUpdateManyWithoutProductInput
   seller: SellerUpdateOneRequiredWithoutProductsInput
-  orders: OrderUpdateManyWithoutProductsInput
 }
 
 input ProductUpdateWithoutSellerDataInput {
@@ -1057,13 +1438,8 @@ input ProductUpdateWithoutSellerDataInput {
   stock: Int
   price: Float
   rating: Float
+  orderItem: OrderItemUpdateManyWithoutProductInput
   reviews: ReviewUpdateManyWithoutProductInput
-  orders: OrderUpdateManyWithoutProductsInput
-}
-
-input ProductUpdateWithWhereUniqueWithoutOrdersInput {
-  where: ProductWhereUniqueInput!
-  data: ProductUpdateWithoutOrdersDataInput!
 }
 
 input ProductUpdateWithWhereUniqueWithoutSellerInput {
@@ -1071,15 +1447,14 @@ input ProductUpdateWithWhereUniqueWithoutSellerInput {
   data: ProductUpdateWithoutSellerDataInput!
 }
 
+input ProductUpsertWithoutOrderItemInput {
+  update: ProductUpdateWithoutOrderItemDataInput!
+  create: ProductCreateWithoutOrderItemInput!
+}
+
 input ProductUpsertWithoutReviewsInput {
   update: ProductUpdateWithoutReviewsDataInput!
   create: ProductCreateWithoutReviewsInput!
-}
-
-input ProductUpsertWithWhereUniqueWithoutOrdersInput {
-  where: ProductWhereUniqueInput!
-  update: ProductUpdateWithoutOrdersDataInput!
-  create: ProductCreateWithoutOrdersInput!
 }
 
 input ProductUpsertWithWhereUniqueWithoutSellerInput {
@@ -1349,13 +1724,13 @@ input ProductWhereInput {
 
   """All values greater than or equal the given value."""
   updatedAt_gte: DateTime
+  orderItem_every: OrderItemWhereInput
+  orderItem_some: OrderItemWhereInput
+  orderItem_none: OrderItemWhereInput
   seller: SellerWhereInput
   reviews_every: ReviewWhereInput
   reviews_some: ReviewWhereInput
   reviews_none: ReviewWhereInput
-  orders_every: OrderWhereInput
-  orders_some: OrderWhereInput
-  orders_none: OrderWhereInput
 }
 
 input ProductWhereUniqueInput {
@@ -1368,16 +1743,19 @@ type Query {
   products(where: ProductWhereInput, orderBy: ProductOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Product]!
   orders(where: OrderWhereInput, orderBy: OrderOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Order]!
   reviews(where: ReviewWhereInput, orderBy: ReviewOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Review]!
+  orderItems(where: OrderItemWhereInput, orderBy: OrderItemOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [OrderItem]!
   user(where: UserWhereUniqueInput!): User
   seller(where: SellerWhereUniqueInput!): Seller
   product(where: ProductWhereUniqueInput!): Product
   order(where: OrderWhereUniqueInput!): Order
   review(where: ReviewWhereUniqueInput!): Review
+  orderItem(where: OrderItemWhereUniqueInput!): OrderItem
   usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
   sellersConnection(where: SellerWhereInput, orderBy: SellerOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): SellerConnection!
   productsConnection(where: ProductWhereInput, orderBy: ProductOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): ProductConnection!
   ordersConnection(where: OrderWhereInput, orderBy: OrderOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): OrderConnection!
   reviewsConnection(where: ReviewWhereInput, orderBy: ReviewOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): ReviewConnection!
+  orderItemsConnection(where: OrderItemWhereInput, orderBy: OrderItemOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): OrderItemConnection!
 
   """Fetches an object given its ID"""
   node(
@@ -2345,6 +2723,7 @@ type Subscription {
   product(where: ProductSubscriptionWhereInput): ProductSubscriptionPayload
   order(where: OrderSubscriptionWhereInput): OrderSubscriptionPayload
   review(where: ReviewSubscriptionWhereInput): ReviewSubscriptionPayload
+  orderItem(where: OrderItemSubscriptionWhereInput): OrderItemSubscriptionPayload
 }
 
 type User implements Node {

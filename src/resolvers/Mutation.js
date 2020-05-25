@@ -475,6 +475,21 @@ const Mutation = {
     );
   },
 
+  createOrderItem(parent, args, { prisma }, info) {
+    return prisma.mutation.createOrderItem(
+      {
+        data: {
+          count: args.count,
+          product: {
+            connect: {
+              id: args.product,
+            },
+          },
+        },
+      },
+      info
+    );
+  },
   async createOrder(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);
     const foundUser = await prisma.exists.User({
@@ -485,9 +500,10 @@ const Mutation = {
     }
     let total = 0;
 
-    console.log(JSON.stringify(args, null, 3));
+    // console.log(JSON.stringify(args, null, 3));
     // using reduce with promises -  https://stackoverflow.com/questions/41243468/javascript-array-reduce-with-async-await   and about reduce() again https://www.freecodecamp.org/forum/t/how-to-use-javascript-array-prototype-reduce-reduce-conceptual-boilerplate-for-problems-on-arrays/14687
-    const products = await args.data.products.reduce(async (acc, item) => {
+
+    const products = await args.data[0].items.reduce(async (acc, item) => {
       const accumulator = await acc;
       const productAvailable = await prisma.query.products(
         {
@@ -500,33 +516,46 @@ const Mutation = {
 
       // TODO - if one of the products unavailable this condition will stop the mutation all together. This needs to be changed
       if (!productAvailable.length) {
-        throw new Error("This product is not available");
+        throw new Error(`Product with id ${item.product} or the amount of the products is not available`); // TODO -  this needs to be changed
       }
 
-        if (productAvailable) {
-          total += productAvailable[0].price * item.count;
-          accumulator.push({ id: item.product });
-          return Promise.resolve(accumulator);
-        }
+      if (productAvailable) {
+        const itemCreated = await prisma.mutation.createOrderItem(
+          {
+            data: {
+              count: item.count,
+              product: {
+                connect: {
+                  id: item.product,
+                },
+              },
+            },
+          },
+          "{ id }"
+        );
+        total += productAvailable[0].price * item.count;
+        accumulator.push({ id: itemCreated.id });
+        return Promise.resolve(accumulator);
+      }
     }, Promise.resolve([]));
-console.log(products)
+    // console.log(products);
     // return {};
-    return prisma.mutation.createOrder({
-      data: {
-        total,
-        products: {
-          connect: products.map((product) => {
-            // console.log(product)
-            return product;
-          }),
-        },
-        user: {
-          connect: {
-            id: userId,
+    return prisma.mutation.createOrder(
+      {
+        data: {
+          total,
+          items: {
+            connect: products,
+          },
+          user: {
+            connect: {
+              id: userId,
+            },
           },
         },
       },
-    }, info);
+      info
+    );
   },
   async deleteOrder(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);

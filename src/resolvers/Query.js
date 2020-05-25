@@ -158,14 +158,45 @@ const Query = {
           },
         },
         {
-          products_some: {
-            name_contains: args.query,
+          items_some: {
+            product: {
+              name_contains: args.query,
+            },
           },
         },
       ],
     };
 
     return prisma.query.orders(opArgs, info);
+  },
+  // TODO - finish this query
+  myOrdersItems(parent, args, { prisma, request }, info) {
+    const opArgs = {
+      first: args.first,
+      skip: args.skip,
+      after: args.after,
+      orderBy: args.orderBy,
+    };
+    console.log(args);
+    const userId = getUserId(request);
+    opArgs.where = {
+      AND: [
+        {
+          user: {
+            id: userId,
+          },
+        },
+        {
+          items_some: {
+            product: {
+              name_contains: args.query,
+            },
+          },
+        },
+      ],
+    };
+
+    return prisma.query.orders(opArgs, info)
   },
 };
 

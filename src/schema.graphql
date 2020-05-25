@@ -38,6 +38,8 @@ type Query {
     after: String
     orderBy: OrderOrderByInput
   ): [Order!]!
+  orderItems(query: String): [OrderItem!]!
+  myOrdersItems(query: String): [OrderItem!]!
 }
 
 type Mutation {
@@ -55,8 +57,9 @@ type Mutation {
   createReview(data: CreateReviewInput!): Review!
   updateReview(id: ID!, data: UpdateReviewInput!): Review!
   deleteReview(id: ID!): Review!
-  createOrder(data: CreateOrderInput!): Order!
+  createOrder(data: [CreateOrderInput!]!): Order!
   deleteOrder(id: ID!): Order!
+  createOrderItem(data: OrderItemInput!): OrderItem!
 }
 
 # type Subscription{
@@ -154,7 +157,8 @@ type Product {
   seller: Seller!
   reviews: [Review!]!
   # TODO - need to work on this
-  orders: [Order!]!
+  orders: [Order!]! 
+  orderItem: [OrderItem!]!
 }
 
 input CreateProductInput {
@@ -178,19 +182,26 @@ input UpdateProductInput {
 
 type Order {
   id: ID!
+  items: [OrderItem!]!
   # products: [Product!]!
-  products: [Product!]!
+  # products: [Product!]!
   total: Float!
   user: User!
 }
 
 input CreateOrderInput {
-  products: [OrderItemInput!]!
-
+  # products: [OrderItemInput!]!
+items: [OrderItemInput!]!
   # products: [OrderItem!]!
   # products: [ID!]!
   # total: Float! will be calculated in mutation
   # user: User! user will have to be logged it, we get the id from getUser.js
+}
+
+type OrderItem{
+  id: ID!
+  product: Product!
+  count: Int!
 }
 
 input OrderItemInput {
@@ -198,11 +209,6 @@ input OrderItemInput {
   count: Int! = 1
 }
 
-# type OrderItem{
-#   id: ID!
-#   product: Product!
-#   count: Int!
-# }
 
 type Review {
   id: ID!
