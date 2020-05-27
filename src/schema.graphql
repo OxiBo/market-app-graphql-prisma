@@ -40,7 +40,7 @@ type Query {
   ): [Order!]!
   orderItems(query: String): [OrderItem!]!
   myOrdersItems(query: String): [OrderItem!]!
-  orderItem(query: String):[OrderItem!]!
+  orderItem(query: String): [OrderItem!]!
 }
 
 type Mutation {
@@ -63,10 +63,26 @@ type Mutation {
   createOrderItem(data: OrderItemInput!): OrderItem!
 }
 
-# type Subscription{
-#   product: ProductSubscriptionPayload!
+type Subscription {
+  product: ProductSubscriptionPayload!
+  review: ReviewSubscriptionPayload!
+}
 
-# }
+enum MutationType {
+  CREATED
+  UPDATED
+  DELETED
+}
+
+type ProductSubscriptionPayload {
+  mutation: MutationType!
+  node: Product
+}
+
+type ReviewSubscriptionPayload {
+  mutation: MutationType!
+  node: Review
+}
 
 enum UserType {
   BUYER
@@ -159,7 +175,7 @@ type Product {
   seller: Seller!
   reviews: [Review!]!
   # TODO - need to work on this
-  orders: [Order!]! 
+  orders: [Order!]!
   orderItem: [OrderItem!]!
 }
 
@@ -193,14 +209,14 @@ type Order {
 
 input CreateOrderInput {
   # products: [OrderItemInput!]!
-items: [OrderItemInput!]!
+  items: [OrderItemInput!]!
   # products: [OrderItem!]!
   # products: [ID!]!
   # total: Float! will be calculated in mutation
   # user: User! user will have to be logged it, we get the id from getUser.js
 }
 
-type OrderItem{
+type OrderItem {
   id: ID!
   product: Product!
   price: Float!
@@ -212,7 +228,6 @@ input OrderItemInput {
   product: ID!
   count: Int! = 1
 }
-
 
 type Review {
   id: ID!

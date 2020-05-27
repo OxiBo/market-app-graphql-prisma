@@ -13,7 +13,7 @@ import Order from "./Order";
 const resolvers = {
   Query,
   Mutation,
-  // Subscription,
+  Subscription,
   User, 
   Seller,
   Product,
