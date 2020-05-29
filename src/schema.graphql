@@ -67,6 +67,7 @@ type Subscription {
   product: ProductSubscriptionPayload!
   review: ReviewSubscriptionPayload!
   orderItem: OrderItemPayload!
+  order: OrderPayload!
 }
 
 enum MutationType {
@@ -85,9 +86,13 @@ type ReviewSubscriptionPayload {
   node: Review
 }
 
-type OrderItemPayload{
+type OrderItemPayload {
   mutation: MutationType
   node: OrderItem
+}
+type OrderPayload {
+  mutation: MutationType
+  node: Order
 }
 
 enum UserType {

@@ -36,11 +36,11 @@ const Subscription = {
       const userExists = await prisma.exists.User({
         id,
       });
-    //   console.log("user " + userExists)
+      //   console.log("user " + userExists)
       const sellerExists = await prisma.exists.Seller({
         id,
       });
-    //   console.log("seller " + sellerExists)
+      //   console.log("seller " + sellerExists)
       if (!userExists && !sellerExists) {
         throw new Error("You have to be logged in to see order items");
       }
@@ -68,6 +68,30 @@ const Subscription = {
       }
 
       return prisma.subscription.orderItem(opArgs, info);
+    },
+  },
+  order: {
+    async subscribe(parent, args, { prisma, request }, info) {
+      const userId = getUserId(request);
+      const userExists = await prisma.exists.User({
+        id: userId,
+      });
+
+      if (!userExists) {
+        throw new Error("User not found!");
+      }
+      return prisma.subscription.order(
+        {
+          where: {
+            node: {
+              user: {
+                id: userId,
+              },
+            },
+          },
+        },
+        info
+      );
     },
   },
 };
