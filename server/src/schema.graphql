@@ -1,0 +1,262 @@
+# import UserOrderByInput, SellerOrderByInput, ReviewOrderByInput, ProductOrderByInput, OrderOrderByInput from './generated/prisma.graphql'
+
+type Query {
+  users(
+    query: String
+    first: Int
+    skip: Int
+    after: String
+    orderBy: UserOrderByInput
+  ): [User!]!
+  sellers(
+    query: String
+    first: Int
+    skip: Int
+    after: String
+    orderBy: SellerOrderByInput
+  ): [Seller!]!
+  products(
+    query: String
+    first: Int
+    skip: Int
+    after: String
+    orderBy: ProductOrderByInput
+  ): [Product!]!
+  meUser: User!
+  meSeller: Seller!
+  reviews(
+    first: Int
+    skip: Int
+    after: String
+    orderBy: ReviewOrderByInput
+  ): [Review!]!
+  myReviews: [Review!]!
+  myOrders(
+    query: String
+    first: Int
+    skip: Int
+    after: String
+    orderBy: OrderOrderByInput
+  ): [Order!]!
+  orderItems(query: String): [OrderItem!]!
+  myOrdersItems(query: String): [OrderItem!]!
+  orderItem(query: String): [OrderItem!]!
+}
+
+type Mutation {
+  createUser(data: CreateUserInput!): UserAuthPayLoad!
+  loginUser(data: LoginUserInput!): UserAuthPayLoad!
+  updateUser(data: UpdateUserInput!): User!
+  deleteUser: User!
+  createSeller(data: CreateSellerInput!): SellerAuthPayLoad!
+  loginSeller(data: LoginSellerInput!): SellerAuthPayLoad!
+  updateSeller(data: UpdateSellerInput!): Seller!
+  deleteSeller: Seller!
+  createProduct(data: CreateProductInput!): Product!
+  updateProduct(id: ID!, data: UpdateProductInput!): Product!
+  deleteProduct(id: ID!): Product!
+  createReview(data: CreateReviewInput!): Review!
+  updateReview(id: ID!, data: UpdateReviewInput!): Review!
+  deleteReview(id: ID!): Review!
+  createOrder(data: [CreateOrderInput!]!): Order!
+  deleteOrder(id: ID!): Order!
+  createOrderItem(data: OrderItemInput!): OrderItem!
+}
+
+type Subscription {
+  product: ProductSubscriptionPayload!
+  review: ReviewSubscriptionPayload!
+  orderItem: OrderItemPayload!
+  order: OrderPayload!
+}
+
+enum MutationType {
+  CREATED
+  UPDATED
+  DELETED
+}
+
+type ProductSubscriptionPayload {
+  mutation: MutationType!
+  node: Product
+}
+
+type ReviewSubscriptionPayload {
+  mutation: MutationType!
+  node: Review
+}
+
+type OrderItemPayload {
+  mutation: MutationType
+  node: OrderItem
+}
+type OrderPayload {
+  mutation: MutationType
+  node: Order
+}
+
+enum UserType {
+  BUYER
+}
+
+enum SellerType {
+  SELLER
+}
+
+type User {
+  id: ID!
+  name: String!
+  #  email will have to be changed this to nullable because email wont be returned to every query
+  email: String
+  password: String!
+  age: Int
+  orders: [Order!]!
+  reviews: [Review!]!
+  type: UserType!
+  orderItems: [OrderItem!]!
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
+  password: String!
+  age: Int
+  type: UserType!
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
+type UserAuthPayLoad {
+  token: String!
+  user: User!
+}
+
+input UpdateUserInput {
+  name: String
+  email: String
+  password: String
+  age: Int
+}
+
+type Seller {
+  id: ID!
+  name: String!
+  #  ???? email will have to be changed this to nullable because email wont be returned to every query
+  email: String
+  password: String!
+  products: [Product!]!
+  # orders: [Order!]!
+  type: SellerType!
+}
+
+input CreateSellerInput {
+  name: String!
+  email: String!
+  password: String!
+  type: SellerType!
+}
+
+input LoginSellerInput {
+  email: String!
+  password: String!
+}
+
+type SellerAuthPayLoad {
+  token: String!
+  seller: Seller!
+}
+
+input UpdateSellerInput {
+  name: String
+  email: String
+  password: String
+}
+
+type Product {
+  id: ID!
+  name: String!
+  department: String!
+  price: Float!
+  count: Int
+  rating: Float!
+  stock: Int!
+  seller: Seller!
+  reviews: [Review!]!
+  # TODO - need to work on this
+  orders: [Order!]!
+  orderItem: [OrderItem!]!
+}
+
+input CreateProductInput {
+  name: String!
+  department: String!
+  price: Float!
+  # count: Int!
+  rating: Float! = 0
+  stock: Int!
+  # https://stackoverflow.com/questions/51563960/how-to-add-default-values-to-input-arguments-in-graphql
+  #   seller: ID!
+}
+
+input UpdateProductInput {
+  name: String
+  department: String
+  price: Float
+  stock: Int
+  # count: Int
+}
+
+type Order {
+  id: ID!
+  items: [OrderItem!]!
+  # products: [Product!]!
+  # products: [Product!]!
+  total: Float!
+  user: User!
+}
+
+input CreateOrderInput {
+  # products: [OrderItemInput!]!
+  items: [OrderItemInput!]!
+  # products: [OrderItem!]!
+  # products: [ID!]!
+  # total: Float! will be calculated in mutation
+  # user: User! user will have to be logged it, we get the id from getUser.js
+}
+
+type OrderItem {
+  id: ID!
+  product: Product!
+  price: Float!
+  count: Int!
+  user: User!
+}
+
+input OrderItemInput {
+  product: ID!
+  count: Int! = 1
+}
+
+type Review {
+  id: ID!
+  text: String!
+  rating: Int!
+  user: User!
+  product: Product!
+  published: Boolean!
+}
+
+input CreateReviewInput {
+  text: String!
+  rating: Int!
+  product: ID!
+  published: Boolean!
+}
+input UpdateReviewInput {
+  text: String
+  rating: Int
+  published: Boolean
+}

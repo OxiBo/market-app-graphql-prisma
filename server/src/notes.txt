@@ -1,0 +1,21 @@
+1. dotenv package:
+Need to require("dotenv").config(); in index.js file as well as in prisma.js where env variables are used
+.env file:
+
+-------
+{{ if environment =='development' }}
+PRISMA_ENDPOINT=http://localhost:4466/market/default
+PRISMA_SECRET=kdjflksjhdlaksjdhflskjhdf
+{{ /if }}
+
+
+{{ if environment =='production'}} 
+    PRISMA_SECRET=sdjfaksjdhfksdhfjksdhjfk
+{{ /if }}
+
+# https://statamic.com/forum/2421-how-to-use-an-env-variable-in-a-conditio
+
+------------
+
+
+2. in  terminal run prisma token to get authorization token to use in HTTP headers in http://localhost:4466/market/default
