@@ -1,4 +1,7 @@
 import getUserId from "../utils/getUserId";
+// from wesbos course
+// forwardTo - https://courses.wesbos.com/account/access/5de58bb4c940036476995e89/view/289540060 from 24 minute
+const { forwardTo } = require("prisma-binding");
 
 const Query = {
   users(parent, args, { prisma }, info) {
@@ -88,6 +91,7 @@ const Query = {
         OR: [
           { name_contains: args.query },
           { department_contains: args.query },
+          { description_contains: args.query },
           {
             seller: {
               name_contains: args.query,
@@ -99,6 +103,9 @@ const Query = {
     // console.log(opArgs)
     return prisma.query.products(opArgs, info);
   },
+  product: forwardTo("prisma"),
+  productsConnection: forwardTo("prisma"),
+
   // TODO - make ALL my reviews visible or only published???
   //   reviews: {
   //     fragment: "fragment reviewInfo on Review { user { id } published } ",

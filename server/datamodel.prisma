@@ -27,10 +27,13 @@ type Product {
   id: ID! @id
   name: String!
   department: String!
+  description: String!
+  image: String
+  largeImage: String
   count: Int
   stock: Int!
   price: Float!
-  orderItem: [OrderItem!]@relation(name: "ProductToOrderItem", onDelete: SET_NULL)
+  orderItem: [OrderItem!]
   rating: Float!@default(value: 0)
   createdAt: DateTime!@createdAt
   updatedAt: DateTime!@updatedAt
@@ -49,7 +52,7 @@ type Order {
 
 type OrderItem {
   id: ID! @id
-  product: Product!@relation(name: "ProductToOrderItem", onDelete: SET_NULL)
+  product: Product!
   count: Int!
   price: Float!
   user: User!@relation(name: "OrderItemToUser", onDelete: SET_NULL)

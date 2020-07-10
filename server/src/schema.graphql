@@ -1,4 +1,4 @@
-# import UserOrderByInput, SellerOrderByInput, ReviewOrderByInput, ProductOrderByInput, OrderOrderByInput from './generated/prisma.graphql'
+# import UserOrderByInput, SellerOrderByInput, ReviewOrderByInput, ProductOrderByInput, OrderOrderByInput, ProductWhereUniqueInput from './generated/prisma.graphql'
 
 type Query {
   users(
@@ -22,6 +22,9 @@ type Query {
     after: String
     orderBy: ProductOrderByInput
   ): [Product!]!
+  # the way it is done in wesboss course
+  product(where: ProductWhereUniqueInput!): Product
+  productsConnection(where: ProductWhereInput): ProductConnection!
   meUser: User!
   meSeller: Seller!
   reviews(
@@ -79,6 +82,20 @@ enum MutationType {
 type ProductSubscriptionPayload {
   mutation: MutationType!
   node: Product
+  previousValues: ProductPreviousValues
+}
+
+type ProductPreviousValues {
+  id: ID!
+  # name: String!
+  # department: String!
+  # description: String!
+  # count: Int
+  # stock: Int!
+  # price: Float!
+  # rating: Float!
+  # createdAt: DateTime!
+  # updatedAt: DateTime!
 }
 
 type ReviewSubscriptionPayload {
@@ -179,6 +196,9 @@ type Product {
   id: ID!
   name: String!
   department: String!
+  description: String!
+  image: String
+  largeImage: String
   price: Float!
   count: Int
   rating: Float!
@@ -193,6 +213,9 @@ type Product {
 input CreateProductInput {
   name: String!
   department: String!
+  description: String!
+  image: String
+  largeImage: String
   price: Float!
   # count: Int!
   rating: Float! = 0
@@ -204,8 +227,11 @@ input CreateProductInput {
 input UpdateProductInput {
   name: String
   department: String
+  image: String
+  largeImage: String
   price: Float
   stock: Int
+  desctiption: String
   # count: Int
 }
 

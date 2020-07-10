@@ -237,7 +237,7 @@ const Mutation = {
     }
     // TODO - change stock count when create Order
     const userId = getUserId(request);
-    console.log(userExists)
+    // console.log(userExists)
     // check if the user is a buyer
     const userExists = await prisma.exists.User({
       id: userId,
@@ -259,9 +259,9 @@ const Mutation = {
       const sellerExists = await prisma.exists.Seller({
         id: sellerId,
       });
-      console.log(sellerExists)
+      // console.log(sellerExists)
       if (args.data.stock && (!userExists && !sellerExists)) {
-        console.log("???")
+        // console.log("???")
         throw new Error("You cannot update the product stock count");
       }
       if (!sellerExists) {

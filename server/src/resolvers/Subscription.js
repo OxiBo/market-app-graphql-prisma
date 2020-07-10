@@ -8,12 +8,17 @@ const Subscription = {
       return prisma.subscription.product(
         {
           where: {
-            node: {
-              stock_gt: 0,
-            },
-          },
+            // OR: [
+              // {
+                node: {
+                  stock_gt: 0,
+                },
+              },
+              // { mutation_in: "DELETED" },
+            // ],
+          // },
         },
-        info
+       info
       );
     },
   },
