@@ -1,5 +1,8 @@
 # import UserOrderByInput, SellerOrderByInput, ReviewOrderByInput, ProductOrderByInput, OrderOrderByInput, ProductWhereUniqueInput from './generated/prisma.graphql'
 
+# https://grandstack.io/docs/graphql-interface-union-types/
+union ResetPasswordResult = UserAuthPayLoad | SellerAuthPayLoad
+
 type Query {
   users(
     query: String
@@ -27,12 +30,16 @@ type Query {
   productsConnection(where: ProductWhereInput): ProductConnection!
   meUser: User!
   meSeller: Seller!
+  seller(id: ID!): Seller!
   reviews(
+    where: ReviewWhereInput
+    productId: ID
     first: Int
     skip: Int
     after: String
     orderBy: ReviewOrderByInput
   ): [Review!]!
+  reviewsConnection(productId: ID, where: ReviewWhereInput): ReviewConnection!
   myReviews: [Review!]!
   myOrders(
     query: String
@@ -55,6 +62,8 @@ type Mutation {
   loginSeller(data: LoginSellerInput!): SellerAuthPayLoad!
   updateSeller(data: UpdateSellerInput!): Seller!
   deleteSeller: Seller!
+  requestReset(email: String!, type: String!): SuccessMessage
+  resetPassword(resetToken: String!, password: String, type: String!): ResetPasswordResult!
   createProduct(data: CreateProductInput!): Product!
   updateProduct(id: ID!, data: UpdateProductInput!): Product!
   deleteProduct(id: ID!): Product!
@@ -96,6 +105,9 @@ type ProductPreviousValues {
   # rating: Float!
   # createdAt: DateTime!
   # updatedAt: DateTime!
+}
+type SuccessMessage {
+  message: String
 }
 
 type ReviewSubscriptionPayload {

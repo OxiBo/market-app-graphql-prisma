@@ -1,19 +1,22 @@
-import bcrypt from "bcryptjs";
-
+import bcrypt, { hash } from "bcryptjs";
+const { randomBytes } = require("crypto");
+const { promisify } = require("util");
 import getUserId from "../utils/getUserId";
 import hashPassword from "../utils/hashPassword";
 import generateJWTtoken from "../utils/generateJWTtoken";
 import calcProductRating from "../utils/calcProductRating";
+import { transport, makeANiceEmail } from "../utils/mail";
 
 const Mutation = {
   async createUser(parent, args, { prisma }, info) {
     // console.log(args.data)
-
+    const email = args.data.email.toLowerCase();
     const password = await hashPassword(args.data.password);
     // console.log(password);
     const user = await prisma.mutation.createUser({
       data: {
         ...args.data,
+        email,
         password,
       },
     });
@@ -25,9 +28,10 @@ const Mutation = {
   },
 
   async loginUser(parent, { data }, { prisma }, info) {
+    const email = data.email.toLowerCase();
     const userExists = await prisma.query.user({
       where: {
-        email: data.email,
+        email,
       },
     });
 
@@ -43,7 +47,7 @@ const Mutation = {
     if (!isPasswordMatch) {
       throw new Error("Unable to log in: wrong email or password");
     }
-   
+
     return {
       user: userExists,
       token: generateJWTtoken(userExists.id),
@@ -63,6 +67,9 @@ const Mutation = {
       args.data.password = await hashPassword(args.data.password);
     }
 
+    if (typeof args.data.email === "string") {
+      args.data.email = args.data.email.toLowerCase();
+    }
     return prisma.mutation.updateUser(
       {
         where: {
@@ -95,13 +102,14 @@ const Mutation = {
   },
   async createSeller(parent, args, { prisma }, info) {
     // console.log(args.data)
-
+    const email = args.data.email.toLowerCase();
     const password = await hashPassword(args.data.password);
     // console.log(password);
     const seller = await prisma.mutation.createSeller({
       data: {
         ...args.data,
         password,
+        email,
       },
     });
     // console.log(user.id);
@@ -111,9 +119,10 @@ const Mutation = {
     };
   },
   async loginSeller(parent, { data }, { prisma }, info) {
+    const email = data.email.toLowerCase();
     const sellerExists = await prisma.query.seller({
       where: {
-        email: data.email,
+        email,
       },
     });
 
@@ -147,7 +156,9 @@ const Mutation = {
     if (typeof args.data.password === "string") {
       args.data.password = await hashPassword(args.data.password);
     }
-
+    if (typeof args.data.email === "string") {
+      args.data.email = args.data.email.toLowerCase();
+    }
     return prisma.mutation.updateSeller(
       {
         where: {
@@ -178,7 +189,148 @@ const Mutation = {
       info
     );
   },
-  async createProduct(parent, args, { prisma, request }, info) {
+  async requestReset(parent, args, { prisma, request }, info) {
+    // console.log(request.response);
+    // check if the user/seller exists in the db
+    let user;
+    if (args.type === "BUYER") {
+      user = await prisma.query.user({
+        where: {
+          email: args.email,
+        },
+      });
+    }
+    if (args.type === "SELLER") {
+      user = await prisma.query.seller({
+        where: {
+          email: args.email,
+        },
+      });
+    }
+
+    if (!user) {
+      throw new Error("No user found for provided email");
+    }
+
+    // generate reset token and update user/seller with the token and expiry reset token
+    const randomBytesPromisified = promisify(randomBytes);
+
+    const resetToken = (await randomBytesPromisified(20)).toString("hex");
+    const resetTokenExpiry = Date.now() + 3600000; // 1 hour from now
+
+    const res =
+      args.type === "BUYER"
+        ? await prisma.mutation.updateUser({
+            where: {
+              email: args.email,
+            },
+            data: {
+              resetToken,
+              resetTokenExpiry,
+            },
+          })
+        : await prisma.mutation.updateSeller({
+            where: {
+              email: args.email,
+            },
+            data: {
+              resetToken,
+              resetTokenExpiry,
+            },
+          });
+
+    console.log(res);
+    // email them reset token, wrapping it in try{}catch is recommended for mail sending here
+
+    try {
+      await transport.sendMail({
+        from: "margooxi@ukr.net",
+        to: user.email,
+        subject: "Your Password Reset Token",
+        html: makeANiceEmail(
+          `Your Password Reset Token is here! \n\n <a href="${process.env.FRONTEND_URL}/reset?type=${args.type}?resetToken=${resetToken}">Click here to reset!</a>`
+        ),
+      });
+    } catch (error) {
+      console.error(error);
+    }
+
+    return {
+      message: "Your reset token has been emailed to provided email address",
+    };
+  },
+  async resetPassword(parent, args, { prisma, request }, info) {
+    // check if the user/seller with the provided reset token exists
+    let user;
+    if (args.type === "BUYER") {
+      [user] = await prisma.query.users({
+        where: {
+          resetToken: args.resetToken,
+          resetTokenExpiry_gte: Date.now() - 3600000,
+        },
+      }); // returns an array with one found user
+     
+    }
+    if (args.type === "SELLER") {
+      [user] = await prisma.query.sellers({
+        where: {
+          resetToken: args.resetToken,
+          resetTokenExpiry_gte: Date.now() - 3600000,
+        },
+      }); // returns an array with one found user
+    }
+  
+    if (!user) {
+      throw new Error("This token is either invalid or expired");
+    }
+
+    // hash new password
+    const password = await hashPassword(args.password);
+
+    // generate JWT
+    const token = generateJWTtoken(user.id);
+
+    // save the new password to the user and remove old reset token fields
+   
+    let updatedUser;
+    if (args.type === "BUYER") {
+      updatedUser = await prisma.mutation.updateUser({
+        where: { email: user.email },
+        data: {
+          password,
+          resetToken: null,
+          resetTokenExpiry: null,
+        },
+      });
+
+      // return user with updated password
+      //https://www.apollographql.com/docs/apollo-server/schema/unions-interfaces/
+      return {
+        __typename: "UserAuthPayLoad",
+        user: updatedUser,
+        token,
+      };
+    }
+
+    if (args.type === "SELLER") {
+      updatedUser = await prisma.mutation.updateSeller({
+        where: { email: user.email },
+        data: {
+          password,
+          resetToken: null,
+          resetTokenExpiry: null,
+        },
+      });
+
+      // return seller with updated password
+      return {
+        __typename: "SellerAuthPayLoad",
+        seller: updatedUser,
+        token,
+      };
+    }
+  },
+  async createProduct(parent, args, { prisma, request, response }, info) {
     //   console.log(request.request.headers)
     const sellerId = getUserId(request);
     const seller = await prisma.query.seller({
@@ -189,6 +341,11 @@ const Mutation = {
     if (!seller) {
       throw new Error("You have to be a seller to create a new product");
     }
+
+    response.cookie("testCookie", "testing cookie in response", {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year cookie
+    });
 
     const isUniqueName = await prisma.query.products({
       where: {
@@ -251,16 +408,13 @@ const Mutation = {
         throw new Error("You have to be logged in User to do that");
       }
     } else if (userExists && args.data.stock) {
-
-
     } else {
-      
       const sellerId = getUserId(request);
       const sellerExists = await prisma.exists.Seller({
         id: sellerId,
       });
       // console.log(sellerExists)
-      if (args.data.stock && (!userExists && !sellerExists)) {
+      if (args.data.stock && !userExists && !sellerExists) {
         // console.log("???")
         throw new Error("You cannot update the product stock count");
       }
@@ -485,7 +639,6 @@ const Mutation = {
   // async createOrderItem(parent, args, { prisma, request }, info) {
   //   const userId = getUserId(request);
 
-
   //   const isProductAvailable = await prisma.query.products(
   //     {
   //       where: {
@@ -504,7 +657,6 @@ const Mutation = {
   //       `Product with id ${args.data.product} or the amount of the items is not available`
   //     ); // TODO -  this needs to be changed
   //   }
-
 
   //   return prisma.mutation.createOrderItem(
   //     {

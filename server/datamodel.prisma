@@ -5,6 +5,8 @@ type User {
     password: String!
     age: Int
     type: String!
+    resetToken: String
+    resetTokenExpiry: Float
     createdAt: DateTime!@createdAt
     updatedAt: DateTime!@updatedAt
     orders: [Order!]! @relation(name: "OrderToUser", onDelete: CASCADE)
@@ -18,6 +20,8 @@ type Seller {
     email: String!@unique
     password: String!
     type: String!
+    resetToken: String
+    resetTokenExpiry: Float
     createdAt: DateTime!@createdAt
     updatedAt: DateTime!@updatedAt
     products: [Product!]!@relation(name: "SellerToProduct", onDelete: CASCADE)

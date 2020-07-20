@@ -19,3 +19,19 @@ PRISMA_SECRET=kdjflksjhdlaksjdhflskjhdf
 
 
 2. in  terminal run prisma token to get authorization token to use in HTTP headers in http://localhost:4466/market/default
+
+about cookies - https://courses.wesbos.com/account/access/5de58bb4c940036476995e89/view/289566888 min6-30
+cookieParser middleware - https://courses.wesbos.com/account/access/5de58bb4c940036476995e89/view/289566888 10-30 add JWT token to cookies - https://courses.wesbos.com/account/access/5de58bb4c940036476995e89/view/289566888 min19
+jwt - https://courses.wesbos.com/account/access/5de58bb4c940036476995e89/view/289569256
+
+persission in mutation create user - https://courses.wesbos.com/account/access/5de58bb4c940036476995e89/view/289566888
+
+randomBytes, crypto,  reset token - https://courses.wesbos.com/account/access/5de58bb4c940036476995e89/view/289572632 min4 
+
+promisify, node library UTILS - https://courses.wesbos.com/account/access/5de58bb4c940036476995e89/view/289572632 min 5
+
+
+
+========== FRONT ===================
+
+"called" property in mutation - https://courses.wesbos.com/account/access/5de58bb4c940036476995e89/view/289579349 min 2

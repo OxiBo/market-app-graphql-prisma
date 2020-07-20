@@ -14,10 +14,19 @@ const resolvers = {
   Query,
   Mutation,
   Subscription,
-  User, 
+  // https://www.apollographql.com/docs/apollo-server/schema/unions-interfaces/
+  ResetPasswordResult: {
+    __resolveType(obj, context, info) {
+      if (obj.user) return "UserAuthPayLoad";
+      if (obj.seller) return "SellerAuthPayLoad";
+      return null;
+    },
+  },
+  User,
   Seller,
   Product,
-  Review, Order
+  Review,
+  Order,
 };
 const fragmentReplacements = extractFragmentReplacements(resolvers);
 

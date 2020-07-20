@@ -44,8 +44,14 @@ const Query = {
     }
     return prisma.query.sellers(opArgs, info);
   },
+  // TODO: restrict access in future when seller has more information
+  seller(parent, args, { prisma }, info) {
+    // console.log(args);
+    return prisma.query.seller({ where: { id: args.id } }, info);
+  },
   meSeller(parent, args, { prisma, request }, info) {
     const sellerId = getUserId(request);
+    // console.log(sellerId);
     return prisma.query.seller(
       {
         where: {
@@ -55,6 +61,7 @@ const Query = {
       info
     );
   },
+
   //   products: {
   //       fragment: "fragment reviewOnProduct on Review { published user { id } }",
   //       resolve(parent, args, { prisma }, info) {
@@ -100,7 +107,7 @@ const Query = {
         ],
       };
     }
-    // console.log(opArgs)
+    console.log(opArgs)
     return prisma.query.products(opArgs, info);
   },
   product: forwardTo("prisma"),
@@ -121,18 +128,27 @@ const Query = {
   //   },
 
   reviews(parent, args, { prisma }, info) {
+    // console.log(args)
     const opArgs = {
       first: args.first,
       skip: args.skip,
       after: args.after,
       orderBy: args.orderBy,
       where: {
-        published: true,
+        AND: [
+          { published: true },
+          {
+            product: {
+              id: args.id,
+            },
+          },
+        ],
       },
     };
 
     return prisma.query.reviews(opArgs, info);
   },
+  reviewsConnection: forwardTo("prisma"),
   myReviews(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);
 

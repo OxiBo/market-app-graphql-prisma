@@ -1,5 +1,5 @@
 # source: http://localhost:4466/market
-# timestamp: Mon Jul 06 2020 23:21:24 GMT-0400 (EDT)
+# timestamp: Sun Jul 19 2020 00:01:09 GMT-0400 (EDT)
 
 type AggregateOrder {
   count: Int!
@@ -2694,6 +2694,8 @@ type Seller implements Node {
   email: String!
   password: String!
   type: String!
+  resetToken: String
+  resetTokenExpiry: Float
   createdAt: DateTime!
   updatedAt: DateTime!
   products(where: ProductWhereInput, orderBy: ProductOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Product!]
@@ -2715,6 +2717,8 @@ input SellerCreateInput {
   email: String!
   password: String!
   type: String!
+  resetToken: String
+  resetTokenExpiry: Float
   products: ProductCreateManyWithoutSellerInput
 }
 
@@ -2729,6 +2733,8 @@ input SellerCreateWithoutProductsInput {
   email: String!
   password: String!
   type: String!
+  resetToken: String
+  resetTokenExpiry: Float
 }
 
 """An edge in a connection."""
@@ -2751,6 +2757,10 @@ enum SellerOrderByInput {
   password_DESC
   type_ASC
   type_DESC
+  resetToken_ASC
+  resetToken_DESC
+  resetTokenExpiry_ASC
+  resetTokenExpiry_DESC
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
@@ -2763,6 +2773,8 @@ type SellerPreviousValues {
   email: String!
   password: String!
   type: String!
+  resetToken: String
+  resetTokenExpiry: Float
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -2809,6 +2821,8 @@ input SellerUpdateInput {
   email: String
   password: String
   type: String
+  resetToken: String
+  resetTokenExpiry: Float
   products: ProductUpdateManyWithoutSellerInput
 }
 
@@ -2817,6 +2831,8 @@ input SellerUpdateManyMutationInput {
   email: String
   password: String
   type: String
+  resetToken: String
+  resetTokenExpiry: Float
 }
 
 input SellerUpdateOneRequiredWithoutProductsInput {
@@ -2831,6 +2847,8 @@ input SellerUpdateWithoutProductsDataInput {
   email: String
   password: String
   type: String
+  resetToken: String
+  resetTokenExpiry: Float
 }
 
 input SellerUpsertWithoutProductsInput {
@@ -3047,6 +3065,68 @@ input SellerWhereInput {
 
   """All values not ending with the given string."""
   type_not_ends_with: String
+  resetToken: String
+
+  """All values that are not equal to given value."""
+  resetToken_not: String
+
+  """All values that are contained in given list."""
+  resetToken_in: [String!]
+
+  """All values that are not contained in given list."""
+  resetToken_not_in: [String!]
+
+  """All values less than the given value."""
+  resetToken_lt: String
+
+  """All values less than or equal the given value."""
+  resetToken_lte: String
+
+  """All values greater than the given value."""
+  resetToken_gt: String
+
+  """All values greater than or equal the given value."""
+  resetToken_gte: String
+
+  """All values containing the given string."""
+  resetToken_contains: String
+
+  """All values not containing the given string."""
+  resetToken_not_contains: String
+
+  """All values starting with the given string."""
+  resetToken_starts_with: String
+
+  """All values not starting with the given string."""
+  resetToken_not_starts_with: String
+
+  """All values ending with the given string."""
+  resetToken_ends_with: String
+
+  """All values not ending with the given string."""
+  resetToken_not_ends_with: String
+  resetTokenExpiry: Float
+
+  """All values that are not equal to given value."""
+  resetTokenExpiry_not: Float
+
+  """All values that are contained in given list."""
+  resetTokenExpiry_in: [Float!]
+
+  """All values that are not contained in given list."""
+  resetTokenExpiry_not_in: [Float!]
+
+  """All values less than the given value."""
+  resetTokenExpiry_lt: Float
+
+  """All values less than or equal the given value."""
+  resetTokenExpiry_lte: Float
+
+  """All values greater than the given value."""
+  resetTokenExpiry_gt: Float
+
+  """All values greater than or equal the given value."""
+  resetTokenExpiry_gte: Float
   createdAt: DateTime
 
   """All values that are not equal to given value."""
@@ -3118,6 +3198,8 @@ type User implements Node {
   password: String!
   age: Int
   type: String!
+  resetToken: String
+  resetTokenExpiry: Float
   createdAt: DateTime!
   updatedAt: DateTime!
   orders(where: OrderWhereInput, orderBy: OrderOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Order!]
@@ -3142,6 +3224,8 @@ input UserCreateInput {
   password: String!
   age: Int
   type: String!
+  resetToken: String
+  resetTokenExpiry: Float
   orders: OrderCreateManyWithoutUserInput
   orderItems: OrderItemCreateManyWithoutUserInput
   reviews: ReviewCreateManyWithoutUserInput
@@ -3169,6 +3253,8 @@ input UserCreateWithoutOrderItemsInput {
   password: String!
   age: Int
   type: String!
+  resetToken: String
+  resetTokenExpiry: Float
   orders: OrderCreateManyWithoutUserInput
   reviews: ReviewCreateManyWithoutUserInput
 }
@@ -3180,6 +3266,8 @@ input UserCreateWithoutOrdersInput {
   password: String!
   age: Int
   type: String!
+  resetToken: String
+  resetTokenExpiry: Float
   orderItems: OrderItemCreateManyWithoutUserInput
   reviews: ReviewCreateManyWithoutUserInput
 }
@@ -3191,6 +3279,8 @@ input UserCreateWithoutReviewsInput {
   password: String!
   age: Int
   type: String!
+  resetToken: String
+  resetTokenExpiry: Float
   orders: OrderCreateManyWithoutUserInput
   orderItems: OrderItemCreateManyWithoutUserInput
 }
@@ -3217,6 +3307,10 @@ enum UserOrderByInput {
   age_DESC
   type_ASC
   type_DESC
+  resetToken_ASC
+  resetToken_DESC
+  resetTokenExpiry_ASC
+  resetTokenExpiry_DESC
   createdAt_ASC
   createdAt_DESC
   updatedAt_ASC
@@ -3230,6 +3324,8 @@ type UserPreviousValues {
   password: String!
   age: Int
   type: String!
+  resetToken: String
+  resetTokenExpiry: Float
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -3277,6 +3373,8 @@ input UserUpdateInput {
   password: String
   age: Int
   type: String
+  resetToken: String
+  resetTokenExpiry: Float
   orders: OrderUpdateManyWithoutUserInput
   orderItems: OrderItemUpdateManyWithoutUserInput
   reviews: ReviewUpdateManyWithoutUserInput
@@ -3288,6 +3386,8 @@ input UserUpdateManyMutationInput {
   password: String
   age: Int
   type: String
+  resetToken: String
+  resetTokenExpiry: Float
 }
 
 input UserUpdateOneRequiredWithoutOrderItemsInput {
@@ -3317,6 +3417,8 @@ input UserUpdateWithoutOrderItemsDataInput {
   password: String
   age: Int
   type: String
+  resetToken: String
+  resetTokenExpiry: Float
   orders: OrderUpdateManyWithoutUserInput
   reviews: ReviewUpdateManyWithoutUserInput
 }
@@ -3327,6 +3429,8 @@ input UserUpdateWithoutOrdersDataInput {
   password: String
   age: Int
   type: String
+  resetToken: String
+  resetTokenExpiry: Float
   orderItems: OrderItemUpdateManyWithoutUserInput
   reviews: ReviewUpdateManyWithoutUserInput
 }
@@ -3337,6 +3441,8 @@ input UserUpdateWithoutReviewsDataInput {
   password: String
   age: Int
   type: String
+  resetToken: String
+  resetTokenExpiry: Float
   orders: OrderUpdateManyWithoutUserInput
   orderItems: OrderItemUpdateManyWithoutUserInput
 }
@@ -3587,6 +3693,68 @@ input UserWhereInput {
 
   """All values not ending with the given string."""
   type_not_ends_with: String
+  resetToken: String
+
+  """All values that are not equal to given value."""
+  resetToken_not: String
+
+  """All values that are contained in given list."""
+  resetToken_in: [String!]
+
+  """All values that are not contained in given list."""
+  resetToken_not_in: [String!]
+
+  """All values less than the given value."""
+  resetToken_lt: String
+
+  """All values less than or equal the given value."""
+  resetToken_lte: String
+
+  """All values greater than the given value."""
+  resetToken_gt: String
+
+  """All values greater than or equal the given value."""
+  resetToken_gte: String
+
+  """All values containing the given string."""
+  resetToken_contains: String
+
+  """All values not containing the given string."""
+  resetToken_not_contains: String
+
+  """All values starting with the given string."""
+  resetToken_starts_with: String
+
+  """All values not starting with the given string."""
+  resetToken_not_starts_with: String
+
+  """All values ending with the given string."""
+  resetToken_ends_with: String
+
+  """All values not ending with the given string."""
+  resetToken_not_ends_with: String
+  resetTokenExpiry: Float
+
+  """All values that are not equal to given value."""
+  resetTokenExpiry_not: Float
+
+  """All values that are contained in given list."""
+  resetTokenExpiry_in: [Float!]
+
+  """All values that are not contained in given list."""
+  resetTokenExpiry_not_in: [Float!]
+
+  """All values less than the given value."""
+  resetTokenExpiry_lt: Float
+
+  """All values less than or equal the given value."""
+  resetTokenExpiry_lte: Float
+
+  """All values greater than the given value."""
+  resetTokenExpiry_gt: Float
+
+  """All values greater than or equal the given value."""
+  resetTokenExpiry_gte: Float
   createdAt: DateTime
 
   """All values that are not equal to given value."""
