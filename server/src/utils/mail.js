@@ -1,4 +1,4 @@
-const nodemailer = require("nodemailer");
+const nodemailer = require("nodemailer"); // https://nodemailer.com/about/
 
 const transport = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
@@ -18,11 +18,10 @@ const makeANiceEmail = (text) => `
     font-size: 20px;">
     <h2>Hello There!</h2>
     <p>${text}</p>
-    <p>From SickFits</p>
+    <p>From Market Place</p>
     </div>`;
 
 // exports.transport = transport;
 // exports.makeANiceEmail = makeANiceEmail;
 
-
-export { transport, makeANiceEmail }
+export { transport, makeANiceEmail };

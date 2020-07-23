@@ -239,9 +239,9 @@ const Mutation = {
             },
           });
 
-    console.log(res);
+    // console.log(res);
     // email them reset token, wrapping it in try{}catch is recommended for mail sending here
-
+// https://nodemailer.com/about/
     try {
       await transport.sendMail({
         from: "margooxi@ukr.net",
