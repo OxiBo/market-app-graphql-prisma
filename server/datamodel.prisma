@@ -48,7 +48,8 @@ type Product {
 type Order {
   id: ID! @id
   items: [OrderItem!]!@relation(name: "OrderToItem", onDelete: CASCADE)
-  total: Float!
+  total: Float
+  started: Boolean!@default(value: false)
   user: User! @relation(name: "OrderToUser", onDelete: SET_NULL)
   createdAt: DateTime! @createdAt
   updatedAt: DateTime!@updatedAt
@@ -56,9 +57,9 @@ type Order {
 
 type OrderItem {
   id: ID! @id
-  product: Product!
-  count: Int!
-  price: Float!
+  product: Product
+  count: Int!@default(value: 1)
+  order: Order!@relation(name: "OrderToItem", onDelete: SET_NULL)
   user: User!@relation(name: "OrderItemToUser", onDelete: SET_NULL)
   createdAt: DateTime! @createdAt
   updatedAt: DateTime!@updatedAt

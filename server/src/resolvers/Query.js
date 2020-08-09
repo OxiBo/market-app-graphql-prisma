@@ -107,7 +107,7 @@ const Query = {
         ],
       };
     }
-    console.log(opArgs)
+    console.log(opArgs);
     return prisma.query.products(opArgs, info);
   },
   product: forwardTo("prisma"),
@@ -165,6 +165,19 @@ const Query = {
     };
 
     return prisma.query.reviews(opArgs, info);
+  },
+  async myCurrentOrder(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+
+    const [orderFound] = await prisma.query.orders(
+      {
+        where: {
+          AND: [{ user: { id: userId } }, { started: true }],
+        },
+      },
+      info
+    );
+    return orderFound;
   },
   myOrders(parent, args, { prisma, request }, info) {
     const opArgs = {

@@ -241,7 +241,7 @@ const Mutation = {
 
     // console.log(res);
     // email them reset token, wrapping it in try{}catch is recommended for mail sending here
-// https://nodemailer.com/about/
+    // https://nodemailer.com/about/
     try {
       await transport.sendMail({
         from: "margooxi@ukr.net",
@@ -269,7 +269,6 @@ const Mutation = {
           resetTokenExpiry_gte: Date.now() - 3600000,
         },
       }); // returns an array with one found user
-     
     }
     if (args.type === "SELLER") {
       [user] = await prisma.query.sellers({
@@ -279,7 +278,7 @@ const Mutation = {
         },
       }); // returns an array with one found user
     }
-  
+
     if (!user) {
       throw new Error("This token is either invalid or expired");
     }
@@ -291,7 +290,7 @@ const Mutation = {
     const token = generateJWTtoken(user.id);
 
     // save the new password to the user and remove old reset token fields
-   
+
     let updatedUser;
     if (args.type === "BUYER") {
       updatedUser = await prisma.mutation.updateUser({
@@ -342,10 +341,10 @@ const Mutation = {
       throw new Error("You have to be a seller to create a new product");
     }
 
-    response.cookie("testCookie", "testing cookie in response", {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year cookie
-    });
+    // response.cookie("testCookie", "testing cookie in response", {
+    //   httpOnly: true,
+    //   maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year cookie
+    // });
 
     const isUniqueName = await prisma.query.products({
       where: {
@@ -678,7 +677,235 @@ const Mutation = {
   //     info
   //   );
   // },
-  async createOrder(parent, args, { prisma, request }, info) {
+  // async createOrder(parent, args, { prisma, request }, info) {
+  //   const userId = getUserId(request);
+  //   const foundUser = await prisma.exists.User({
+  //     id: userId,
+  //   });
+  //   if (!foundUser) {
+  //     throw new Error("You have to be logged in user to create an order");
+  //   }
+
+  //   // check if user does not have an open order(cart) already
+  //   const orderExists = await prisma.query.orders(
+  //     {
+  //       where: {
+  //         AND: [{ user: { id: userId } }, { started: true }],
+  //       },
+  //     },
+  //     info
+  //   );
+
+  //   if (orderExists.length) {
+  //     throw new Error("You have already created a new order");
+  //   }
+
+  //   return prisma.mutation.createOrder(
+  //     {
+  //       data: {
+  //         started: true,
+  //         user: {
+  //           connect: [{
+  //             id: userId,
+  //           }],
+  //         },
+  //       },
+  //     },
+  //     info
+  //   );
+  // },
+  async deleteOrder(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    const foundOrder = await prisma.exists.Order({
+      id: args.id,
+      user: {
+        id: userId,
+      },
+    });
+    if (!foundOrder) {
+      throw new Error("Order not found");
+    }
+
+    return prisma.mutation.deleteOrder(
+      {
+        where: {
+          id: args.id,
+        },
+      },
+      info
+    );
+  },
+  async addToOrder(parent, args, { prisma, request }, info) {
+    // check if the user is logged in
+    const userId = getUserId(request);
+
+    // find the product to get price and availability
+    const [productAvailable] = await prisma.query.products(
+      {
+        where: {
+          AND: [{ id: args.id }, { stock_gt: 0 }],
+        },
+      },
+      `{ price }`
+    );
+
+    console.log(productAvailable);
+    if (!productAvailable) {
+      throw new Error("Product is not available");
+    }
+
+    // check if a new order has already been created
+    const [orderExists] = await prisma.query.orders(
+      {
+        where: {
+          AND: [{ user: { id: userId } }, { started: true }],
+        },
+      },
+      "{ id items {id count product { id name }}}"
+    );
+
+    let orderItemCreated;
+
+    // const test = await prisma.query.orders(null, '{id items{id}}')
+    // console.log(test)
+    // if order(cart) was not created yet
+    if (!orderExists) {
+      const newOrder = await prisma.mutation.createOrder(
+        {
+          data: {
+            started: true,
+            user: {
+              connect: {
+                id: userId,
+              },
+            },
+          },
+        },
+        info
+      );
+
+      orderItemCreated = await prisma.mutation.createOrderItem(
+        {
+          data: {
+            user: {
+              connect: {
+                id: userId,
+              },
+            },
+            product: {
+              connect: { id: args.id },
+            },
+            order: {
+              connect: { id: newOrder.id },
+            },
+            // count: args.count  - might use this in the future
+            // price: productAvailable.price,
+          },
+        },
+        info
+      );
+      // console.log(newOrder.items);
+      // console.log(orderItemCreated)
+      // const updatedOrder =
+      await prisma.mutation.updateOrder(
+        {
+          where: {
+            id: newOrder.id,
+          },
+          data: {
+            items: {
+              connect: [{ id: orderItemCreated.id }],
+            },
+          },
+        },
+        info
+      );
+      // console.log(updatedOrder);
+      return orderItemCreated;
+    }
+
+    // if order(cart) already Exists
+
+    // query the user's current order(=cart) ( check if that item(product) is already in their order(cart) and increment by 1 if it is)
+    // console.log(orderExists);
+    const orderItemExists = orderExists.items.find(
+      (item) => item.product.id === args.id
+    );
+
+    if (orderItemExists) {
+      console.log("This product is already in the user's cart");
+      console.log(orderItemExists);
+      console.log(productAvailable);
+      return prisma.mutation.updateOrderItem(
+        {
+          where: { id: orderItemExists.id },
+          data: {
+            count: orderItemExists.count + 1,
+            // price: orderItemExists.price + productAvailable.price,
+          },
+        },
+        info
+      );
+    }
+
+    // if it's not in the cart and product stock is greater than 0, create a fresh cart item
+    orderItemCreated = await prisma.mutation.createOrderItem(
+      {
+        data: {
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+          product: {
+            connect: { id: args.id },
+          },
+          order: {
+            connect: { id: orderExists.id },
+          },
+          //count: args.count  - ???
+          // price: productAvailable.price,
+        },
+      },
+      info
+    );
+    // console.log(orderItemCreated);
+    return orderItemExists;
+
+    // return orderItemCreated;
+  },
+  async removeItemFromOrder(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    const itemExists = await prisma.exists.OrderItem(
+      {
+        id: args.id,
+        user: {
+          id: userId,
+        },
+      },
+      info
+    );
+    
+    if (!itemExists) {
+      throw new Error("The item is not found or does not belong to your cart");
+    }
+    return prisma.mutation.deleteOrderItem(
+      {
+        where: {
+          id: args.id,
+        },
+      },
+      info
+    );
+  },
+};
+
+export default Mutation;
+
+/* 
+
+
+ async createOrder(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);
     const foundUser = await prisma.exists.User({
       id: userId,
@@ -753,27 +980,5 @@ const Mutation = {
       info
     );
   },
-  async deleteOrder(parent, args, { prisma, request }, info) {
-    const userId = getUserId(request);
-    const foundOrder = await prisma.exists.Order({
-      id: args.id,
-      user: {
-        id: userId,
-      },
-    });
-    if (!foundOrder) {
-      throw new Error("Order not found");
-    }
 
-    return prisma.mutation.deleteOrder(
-      {
-        where: {
-          id: args.id,
-        },
-      },
-      info
-    );
-  },
-};
-
-export default Mutation;
+*/

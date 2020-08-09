@@ -1,5 +1,6 @@
 # import UserOrderByInput, SellerOrderByInput, ReviewOrderByInput, ProductOrderByInput, OrderOrderByInput, ProductWhereUniqueInput from './generated/prisma.graphql'
 
+# https://www.apollographql.com/docs/apollo-server/schema/unions-interfaces/
 # https://grandstack.io/docs/graphql-interface-union-types/
 union ResetPasswordResult = UserAuthPayLoad | SellerAuthPayLoad
 
@@ -51,6 +52,7 @@ type Query {
   orderItems(query: String): [OrderItem!]!
   myOrdersItems(query: String): [OrderItem!]!
   orderItem(query: String): [OrderItem!]!
+  myCurrentOrder: Order
 }
 
 type Mutation {
@@ -73,6 +75,8 @@ type Mutation {
   createOrder(data: [CreateOrderInput!]!): Order!
   deleteOrder(id: ID!): Order!
   createOrderItem(data: OrderItemInput!): OrderItem!
+  removeItemFromOrder(id: ID!): OrderItem!
+  addToOrder(id: ID!): OrderItem
 }
 
 type Subscription {
@@ -250,32 +254,36 @@ input UpdateProductInput {
 type Order {
   id: ID!
   items: [OrderItem!]!
-  # products: [Product!]!
-  # products: [Product!]!
-  total: Float!
+  started: Boolean!
+  # finished: Boolean!
+  total: Float
   user: User!
 }
 
 input CreateOrderInput {
   # products: [OrderItemInput!]!
-  items: [OrderItemInput!]!
+  items: [ID!]
+  started: Boolean!
   # products: [OrderItem!]!
   # products: [ID!]!
   # total: Float! will be calculated in mutation
-  # user: User! user will have to be logged it, we get the id from getUser.js
+  user: ID! 
 }
 
 type OrderItem {
   id: ID!
-  product: Product!
-  price: Float!
+  product: Product
+  # price: Float!
   count: Int!
   user: User!
+  order: Order!
 }
 
 input OrderItemInput {
   product: ID!
   count: Int! = 1
+  order: ID!
+  user: ID!
 }
 
 type Review {
