@@ -1,5 +1,5 @@
 # source: http://localhost:4466/market
-# timestamp: Fri Aug 07 2020 23:27:43 GMT-0400 (EDT)
+# timestamp: Wed Aug 12 2020 17:42:21 GMT-0400 (EDT)
 
 type AggregateOrder {
   count: Int!
@@ -2701,6 +2701,7 @@ type Seller implements Node {
   name: String!
   email: String!
   password: String!
+  image: String
   type: String!
   resetToken: String
   resetTokenExpiry: Float
@@ -2724,6 +2725,7 @@ input SellerCreateInput {
   name: String!
   email: String!
   password: String!
+  image: String
   type: String!
   resetToken: String
   resetTokenExpiry: Float
@@ -2740,6 +2742,7 @@ input SellerCreateWithoutProductsInput {
   name: String!
   email: String!
   password: String!
+  image: String
   type: String!
   resetToken: String
   resetTokenExpiry: Float
@@ -2763,6 +2766,8 @@ enum SellerOrderByInput {
   email_DESC
   password_ASC
   password_DESC
+  image_ASC
+  image_DESC
   type_ASC
   type_DESC
   resetToken_ASC
@@ -2780,6 +2785,7 @@ type SellerPreviousValues {
   name: String!
   email: String!
   password: String!
+  image: String
   type: String!
   resetToken: String
   resetTokenExpiry: Float
@@ -2828,6 +2834,7 @@ input SellerUpdateInput {
   name: String
   email: String
   password: String
+  image: String
   type: String
   resetToken: String
   resetTokenExpiry: Float
@@ -2838,6 +2845,7 @@ input SellerUpdateManyMutationInput {
   name: String
   email: String
   password: String
+  image: String
   type: String
   resetToken: String
   resetTokenExpiry: Float
@@ -2854,6 +2862,7 @@ input SellerUpdateWithoutProductsDataInput {
   name: String
   email: String
   password: String
+  image: String
   type: String
   resetToken: String
   resetTokenExpiry: Float
@@ -3033,6 +3042,46 @@ input SellerWhereInput {
 
   """All values not ending with the given string."""
   password_not_ends_with: String
+  image: String
+
+  """All values that are not equal to given value."""
+  image_not: String
+
+  """All values that are contained in given list."""
+  image_in: [String!]
+
+  """All values that are not contained in given list."""
+  image_not_in: [String!]
+
+  """All values less than the given value."""
+  image_lt: String
+
+  """All values less than or equal the given value."""
+  image_lte: String
+
+  """All values greater than the given value."""
+  image_gt: String
+
+  """All values greater than or equal the given value."""
+  image_gte: String
+
+  """All values containing the given string."""
+  image_contains: String
+
+  """All values not containing the given string."""
+  image_not_contains: String
+
+  """All values starting with the given string."""
+  image_starts_with: String
+
+  """All values not starting with the given string."""
+  image_not_starts_with: String
+
+  """All values ending with the given string."""
+  image_ends_with: String
+
+  """All values not ending with the given string."""
+  image_not_ends_with: String
   type: String
 
   """All values that are not equal to given value."""
@@ -3205,6 +3254,7 @@ type User implements Node {
   email: String!
   password: String!
   age: Int
+  image: String
   type: String!
   resetToken: String
   resetTokenExpiry: Float
@@ -3231,6 +3281,7 @@ input UserCreateInput {
   email: String!
   password: String!
   age: Int
+  image: String
   type: String!
   resetToken: String
   resetTokenExpiry: Float
@@ -3260,6 +3311,7 @@ input UserCreateWithoutOrderItemsInput {
   email: String!
   password: String!
   age: Int
+  image: String
   type: String!
   resetToken: String
   resetTokenExpiry: Float
@@ -3273,6 +3325,7 @@ input UserCreateWithoutOrdersInput {
   email: String!
   password: String!
   age: Int
+  image: String
   type: String!
   resetToken: String
   resetTokenExpiry: Float
@@ -3286,6 +3339,7 @@ input UserCreateWithoutReviewsInput {
   email: String!
   password: String!
   age: Int
+  image: String
   type: String!
   resetToken: String
   resetTokenExpiry: Float
@@ -3313,6 +3367,8 @@ enum UserOrderByInput {
   password_DESC
   age_ASC
   age_DESC
+  image_ASC
+  image_DESC
   type_ASC
   type_DESC
   resetToken_ASC
@@ -3331,6 +3387,7 @@ type UserPreviousValues {
   email: String!
   password: String!
   age: Int
+  image: String
   type: String!
   resetToken: String
   resetTokenExpiry: Float
@@ -3380,6 +3437,7 @@ input UserUpdateInput {
   email: String
   password: String
   age: Int
+  image: String
   type: String
   resetToken: String
   resetTokenExpiry: Float
@@ -3393,6 +3451,7 @@ input UserUpdateManyMutationInput {
   email: String
   password: String
   age: Int
+  image: String
   type: String
   resetToken: String
   resetTokenExpiry: Float
@@ -3424,6 +3483,7 @@ input UserUpdateWithoutOrderItemsDataInput {
   email: String
   password: String
   age: Int
+  image: String
   type: String
   resetToken: String
   resetTokenExpiry: Float
@@ -3436,6 +3496,7 @@ input UserUpdateWithoutOrdersDataInput {
   email: String
   password: String
   age: Int
+  image: String
   type: String
   resetToken: String
   resetTokenExpiry: Float
@@ -3448,6 +3509,7 @@ input UserUpdateWithoutReviewsDataInput {
   email: String
   password: String
   age: Int
+  image: String
   type: String
   resetToken: String
   resetTokenExpiry: Float
@@ -3661,6 +3723,46 @@ input UserWhereInput {
 
   """All values greater than or equal the given value."""
   age_gte: Int
+  image: String
+
+  """All values that are not equal to given value."""
+  image_not: String
+
+  """All values that are contained in given list."""
+  image_in: [String!]
+
+  """All values that are not contained in given list."""
+  image_not_in: [String!]
+
+  """All values less than the given value."""
+  image_lt: String
+
+  """All values less than or equal the given value."""
+  image_lte: String
+
+  """All values greater than the given value."""
+  image_gt: String
+
+  """All values greater than or equal the given value."""
+  image_gte: String
+
+  """All values containing the given string."""
+  image_contains: String
+
+  """All values not containing the given string."""
+  image_not_contains: String
+
+  """All values starting with the given string."""
+  image_starts_with: String
+
+  """All values not starting with the given string."""
+  image_not_starts_with: String
+
+  """All values ending with the given string."""
+  image_ends_with: String
+
+  """All values not ending with the given string."""
+  image_not_ends_with: String
   type: String
 
   """All values that are not equal to given value."""

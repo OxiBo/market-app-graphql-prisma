@@ -61,7 +61,7 @@ const Query = {
       info
     );
   },
-
+  sellersConnection: forwardTo("prisma"),
   //   products: {
   //       fragment: "fragment reviewOnProduct on Review { published user { id } }",
   //       resolve(parent, args, { prisma }, info) {

@@ -4,6 +4,7 @@ type User {
     email: String!@unique
     password: String!
     age: Int
+    image: String
     type: String!
     resetToken: String
     resetTokenExpiry: Float
@@ -19,6 +20,7 @@ type Seller {
     name: String!@unique
     email: String!@unique
     password: String!
+    image: String
     type: String!
     resetToken: String
     resetTokenExpiry: Float

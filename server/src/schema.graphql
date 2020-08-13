@@ -19,6 +19,7 @@ type Query {
     after: String
     orderBy: SellerOrderByInput
   ): [Seller!]!
+  sellersConnection(where: SellerWhereInput): SellerConnection!
   products(
     query: String
     first: Int
@@ -143,6 +144,7 @@ type User {
   email: String
   password: String!
   age: Int
+  image: String
   orders: [Order!]!
   reviews: [Review!]!
   type: UserType!
@@ -155,6 +157,7 @@ input CreateUserInput {
   password: String!
   age: Int
   type: UserType!
+  image: String
 }
 
 input LoginUserInput {
@@ -181,6 +184,7 @@ type Seller {
   email: String
   password: String!
   products: [Product!]!
+  image: String
   # orders: [Order!]!
   type: SellerType!
 }
@@ -190,6 +194,7 @@ input CreateSellerInput {
   email: String!
   password: String!
   type: SellerType!
+  image: String
 }
 
 input LoginSellerInput {
