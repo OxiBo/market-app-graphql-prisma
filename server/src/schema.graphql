@@ -175,6 +175,7 @@ input UpdateUserInput {
   email: String
   password: String
   age: Int
+  image: String
 }
 
 type Seller {
