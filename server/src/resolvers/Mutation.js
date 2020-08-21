@@ -4,6 +4,7 @@ const { promisify } = require("util");
 import getUserId from "../utils/getUserId";
 import hashPassword from "../utils/hashPassword";
 import generateJWTtoken from "../utils/generateJWTtoken";
+const stripe = require("stripe")(process.env.STRIPE_KEY);
 import calcProductRating from "../utils/calcProductRating";
 import { transport, makeANiceEmail } from "../utils/mail";
 
@@ -364,6 +365,10 @@ const Mutation = {
     if (isUniqueName.length) {
       throw new Error("You have a product with the same name already");
     }
+
+    // console.log(price)
+    // const price = args.price * 100;
+
     return prisma.mutation.createProduct(
       {
         data: {
@@ -738,7 +743,7 @@ const Mutation = {
   async addToOrder(parent, args, { prisma, request }, info) {
     // check if the user is logged in
     const userId = getUserId(request);
-
+    console.log(args);
     // find the product to get price and availability
     const [productAvailable] = await prisma.query.products(
       {
@@ -746,9 +751,9 @@ const Mutation = {
           AND: [{ id: args.id }, { stock_gt: 0 }],
         },
       },
-      `{ price }`
+      `{ name description price image }`
     );
-
+    // console.log("Is product available???");
     console.log(productAvailable);
     if (!productAvailable) {
       throw new Error("Product is not available");
@@ -758,7 +763,7 @@ const Mutation = {
     const [orderExists] = await prisma.query.orders(
       {
         where: {
-          AND: [{ user: { id: userId } }, { started: true }],
+          AND: [{ user: { id: userId } }, { started: true, finished: false }],
         },
       },
       "{ id items {id count product { id name }}}"
@@ -783,10 +788,11 @@ const Mutation = {
         },
         info
       );
-
+      // console.log(productAvailable);
       orderItemCreated = await prisma.mutation.createOrderItem(
         {
           data: {
+            ...productAvailable,
             user: {
               connect: {
                 id: userId,
@@ -798,6 +804,7 @@ const Mutation = {
             order: {
               connect: { id: newOrder.id },
             },
+
             // count: args.count  - might use this in the future
             // price: productAvailable.price,
           },
@@ -805,7 +812,7 @@ const Mutation = {
         info
       );
       // console.log(newOrder.items);
-      // console.log(orderItemCreated)
+      // console.log(orderItemCreated);
       // const updatedOrder =
       await prisma.mutation.updateOrder(
         {
@@ -834,8 +841,7 @@ const Mutation = {
 
     if (orderItemExists) {
       console.log("This product is already in the user's cart");
-      console.log(orderItemExists);
-      console.log(productAvailable);
+
       return prisma.mutation.updateOrderItem(
         {
           where: { id: orderItemExists.id },
@@ -852,6 +858,7 @@ const Mutation = {
     orderItemCreated = await prisma.mutation.createOrderItem(
       {
         data: {
+          ...productAvailable,
           user: {
             connect: {
               id: userId,
@@ -885,7 +892,7 @@ const Mutation = {
       },
       info
     );
-    
+
     if (!itemExists) {
       throw new Error("The item is not found or does not belong to your cart");
     }
@@ -897,6 +904,59 @@ const Mutation = {
       },
       info
     );
+  },
+  async checkoutAndPay(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+
+    const [currentOrder] = await prisma.query.orders(
+      {
+        where: {
+          AND: [
+            {
+              user: {
+                id: userId,
+              },
+              started: true,
+              finished: false,
+            },
+          ],
+        },
+      },
+      info
+    ); //    `{ id items { id count price name}}`
+
+    const total = currentOrder.items.reduce((total, item) => {
+      return total + item.price * item.count;
+    }, 0);
+
+    // console.log(total)
+    // console.log(args.token)
+    // console.log(currentOrder);
+
+    // https://stripe.com/docs/api/charges/create
+    const charge = await stripe.charges.create({
+      amount: total,
+      currency: "usd",
+      source: args.token,
+    });
+    // console.log(charge)
+
+    const finishedOrder = await prisma.mutation.updateOrder(
+      {
+        where: {
+          id: currentOrder.id,
+        },
+        data: {
+          total: charge.amount,
+          charge: charge.id,
+          finished: true,
+          finishedAt: new Date()
+        },
+      },
+      info
+    );
+
+    return finishedOrder;
   },
 };
 

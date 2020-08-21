@@ -44,7 +44,7 @@ const Query = {
     }
     return prisma.query.sellers(opArgs, info);
   },
-  // TODO: restrict access in future when seller has more information
+  // ??TODO: restrict access in future when seller has more information
   seller(parent, args, { prisma }, info) {
     // console.log(args);
     return prisma.query.seller({ where: { id: args.id } }, info);
@@ -172,7 +172,7 @@ const Query = {
     const [orderFound] = await prisma.query.orders(
       {
         where: {
-          AND: [{ user: { id: userId } }, { started: true }],
+          AND: [{ user: { id: userId } }, { started: true, finished: false }],
         },
       },
       info
@@ -206,6 +206,17 @@ const Query = {
     };
 
     return prisma.query.orders(opArgs, info);
+  },
+  async order(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    return prisma.query.order(
+      {
+        where: {
+          id: args.id,
+        },
+      },
+      info
+    );
   },
   // TODO - finish this query
   myOrdersItems(parent, args, { prisma, request }, info) {

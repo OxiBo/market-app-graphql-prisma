@@ -54,6 +54,7 @@ type Query {
   myOrdersItems(query: String): [OrderItem!]!
   orderItem(query: String): [OrderItem!]!
   myCurrentOrder: Order
+  order(id: ID!): Order!
 }
 
 type Mutation {
@@ -66,7 +67,11 @@ type Mutation {
   updateSeller(data: UpdateSellerInput!): Seller!
   deleteSeller: Seller!
   requestReset(email: String!, type: String!): SuccessMessage
-  resetPassword(resetToken: String!, password: String, type: String!): ResetPasswordResult!
+  resetPassword(
+    resetToken: String!
+    password: String
+    type: String!
+  ): ResetPasswordResult!
   createProduct(data: CreateProductInput!): Product!
   updateProduct(id: ID!, data: UpdateProductInput!): Product!
   deleteProduct(id: ID!): Product!
@@ -78,6 +83,7 @@ type Mutation {
   createOrderItem(data: OrderItemInput!): OrderItem!
   removeItemFromOrder(id: ID!): OrderItem!
   addToOrder(id: ID!): OrderItem
+  checkoutAndPay(token: String!): Order!
 }
 
 type Subscription {
@@ -221,7 +227,7 @@ type Product {
   description: String!
   image: String
   largeImage: String
-  price: Float!
+  price: Int!
   count: Int
   rating: Float!
   stock: Int!
@@ -238,7 +244,7 @@ input CreateProductInput {
   description: String!
   image: String
   largeImage: String
-  price: Float!
+  price: Int!
   # count: Int!
   rating: Float! = 0
   stock: Int!
@@ -251,7 +257,7 @@ input UpdateProductInput {
   department: String
   image: String
   largeImage: String
-  price: Float
+  price: Int
   stock: Int
   desctiption: String
   # count: Int
@@ -261,8 +267,9 @@ type Order {
   id: ID!
   items: [OrderItem!]!
   started: Boolean!
-  # finished: Boolean!
-  total: Float
+  finished: Boolean!
+  finishedAt: DateTime
+  total: Int
   user: User!
 }
 
@@ -273,19 +280,23 @@ input CreateOrderInput {
   # products: [OrderItem!]!
   # products: [ID!]!
   # total: Float! will be calculated in mutation
-  user: ID! 
+  user: ID!
 }
 
 type OrderItem {
   id: ID!
   product: Product
-  # price: Float!
+  name: String!
+  description: String!
+  image: String
+  price: Int!
   count: Int!
   user: User!
   order: Order!
 }
 
 input OrderItemInput {
+  
   product: ID!
   count: Int! = 1
   order: ID!

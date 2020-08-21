@@ -38,7 +38,7 @@ type Product {
   largeImage: String
   count: Int
   stock: Int!
-  price: Float!
+  price: Int!
   orderItem: [OrderItem!]
   rating: Float!@default(value: 0)
   createdAt: DateTime!@createdAt
@@ -50,9 +50,12 @@ type Product {
 type Order {
   id: ID! @id
   items: [OrderItem!]!@relation(name: "OrderToItem", onDelete: CASCADE)
-  total: Float
+  total: Int
   started: Boolean!@default(value: false)
+  finished: Boolean!@default(value: false)
+  finishedAt: DateTime
   user: User! @relation(name: "OrderToUser", onDelete: SET_NULL)
+  charge: String
   createdAt: DateTime! @createdAt
   updatedAt: DateTime!@updatedAt
 }
@@ -60,6 +63,10 @@ type Order {
 type OrderItem {
   id: ID! @id
   product: Product
+  name: String!
+  description: String!
+  image: String
+  price: Int!
   count: Int!@default(value: 1)
   order: Order!@relation(name: "OrderToItem", onDelete: SET_NULL)
   user: User!@relation(name: "OrderItemToUser", onDelete: SET_NULL)
