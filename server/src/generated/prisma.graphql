@@ -1,5 +1,5 @@
 # source: http://localhost:4466/market
-# timestamp: Thu Aug 20 2020 23:29:02 GMT-0400 (EDT)
+# timestamp: Sun Sep 06 2020 16:53:31 GMT-0400 (EDT)
 
 type AggregateOrder {
   count: Int!
@@ -176,6 +176,7 @@ type OrderItem implements Node {
   count: Int!
   order: Order!
   user: User!
+  reviewed: Review
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -200,6 +201,7 @@ input OrderItemCreateInput {
   product: ProductCreateOneWithoutOrderItemInput
   order: OrderCreateOneWithoutItemsInput!
   user: UserCreateOneWithoutOrderItemsInput!
+  reviewed: ReviewCreateOneInput
 }
 
 input OrderItemCreateManyWithoutOrderInput {
@@ -226,6 +228,7 @@ input OrderItemCreateWithoutOrderInput {
   count: Int
   product: ProductCreateOneWithoutOrderItemInput
   user: UserCreateOneWithoutOrderItemsInput!
+  reviewed: ReviewCreateOneInput
 }
 
 input OrderItemCreateWithoutProductInput {
@@ -237,6 +240,7 @@ input OrderItemCreateWithoutProductInput {
   count: Int
   order: OrderCreateOneWithoutItemsInput!
   user: UserCreateOneWithoutOrderItemsInput!
+  reviewed: ReviewCreateOneInput
 }
 
 input OrderItemCreateWithoutUserInput {
@@ -248,6 +252,7 @@ input OrderItemCreateWithoutUserInput {
   count: Int
   product: ProductCreateOneWithoutOrderItemInput
   order: OrderCreateOneWithoutItemsInput!
+  reviewed: ReviewCreateOneInput
 }
 
 """An edge in a connection."""
@@ -594,6 +599,7 @@ input OrderItemUpdateInput {
   product: ProductUpdateOneWithoutOrderItemInput
   order: OrderUpdateOneRequiredWithoutItemsInput
   user: UserUpdateOneRequiredWithoutOrderItemsInput
+  reviewed: ReviewUpdateOneInput
 }
 
 input OrderItemUpdateManyDataInput {
@@ -661,6 +667,7 @@ input OrderItemUpdateWithoutOrderDataInput {
   count: Int
   product: ProductUpdateOneWithoutOrderItemInput
   user: UserUpdateOneRequiredWithoutOrderItemsInput
+  reviewed: ReviewUpdateOneInput
 }
 
 input OrderItemUpdateWithoutProductDataInput {
@@ -671,6 +678,7 @@ input OrderItemUpdateWithoutProductDataInput {
   count: Int
   order: OrderUpdateOneRequiredWithoutItemsInput
   user: UserUpdateOneRequiredWithoutOrderItemsInput
+  reviewed: ReviewUpdateOneInput
 }
 
 input OrderItemUpdateWithoutUserDataInput {
@@ -681,6 +689,7 @@ input OrderItemUpdateWithoutUserDataInput {
   count: Int
   product: ProductUpdateOneWithoutOrderItemInput
   order: OrderUpdateOneRequiredWithoutItemsInput
+  reviewed: ReviewUpdateOneInput
 }
 
 input OrderItemUpdateWithWhereUniqueWithoutOrderInput {
@@ -976,6 +985,7 @@ input OrderItemWhereInput {
   product: ProductWhereInput
   order: OrderWhereInput
   user: UserWhereInput
+  reviewed: ReviewWhereInput
 }
 
 input OrderItemWhereUniqueInput {
@@ -2705,6 +2715,11 @@ input ReviewCreateManyWithoutUserInput {
   connect: [ReviewWhereUniqueInput!]
 }
 
+input ReviewCreateOneInput {
+  create: ReviewCreateInput
+  connect: ReviewWhereUniqueInput
+}
+
 input ReviewCreateWithoutProductInput {
   id: ID
   text: String!
@@ -2952,6 +2967,14 @@ input ReviewSubscriptionWhereInput {
   node: ReviewWhereInput
 }
 
+input ReviewUpdateDataInput {
+  text: String
+  rating: Int
+  published: Boolean
+  product: ProductUpdateOneRequiredWithoutReviewsInput
+  user: UserUpdateOneRequiredWithoutReviewsInput
+}
+
 input ReviewUpdateInput {
   text: String
   rating: Int
@@ -3001,6 +3024,15 @@ input ReviewUpdateManyWithWhereNestedInput {
   data: ReviewUpdateManyDataInput!
 }
 
+input ReviewUpdateOneInput {
+  create: ReviewCreateInput
+  connect: ReviewWhereUniqueInput
+  disconnect: Boolean
+  delete: Boolean
+  update: ReviewUpdateDataInput
+  upsert: ReviewUpsertNestedInput
+}
+
 input ReviewUpdateWithoutProductDataInput {
   text: String
   rating: Int
@@ -3023,6 +3055,11 @@ input ReviewUpdateWithWhereUniqueWithoutProductInput {
 input ReviewUpdateWithWhereUniqueWithoutUserInput {
   where: ReviewWhereUniqueInput!
   data: ReviewUpdateWithoutUserDataInput!
+}
+
+input ReviewUpsertNestedInput {
+  update: ReviewUpdateDataInput!
+  create: ReviewCreateInput!
 }
 
 input ReviewUpsertWithWhereUniqueWithoutProductInput {

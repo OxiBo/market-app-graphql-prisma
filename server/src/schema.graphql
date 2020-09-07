@@ -1,4 +1,4 @@
-# import UserOrderByInput, SellerOrderByInput, ReviewOrderByInput, ProductOrderByInput, OrderOrderByInput, ProductWhereUniqueInput from './generated/prisma.graphql'
+# import UserOrderByInput, SellerOrderByInput, ReviewOrderByInput, ProductOrderByInput, OrderOrderByInput, ProductWhereUniqueInput, OrderItemWhereInput, OrderItemOrderByInput from './generated/prisma.graphql'
 
 # https://www.apollographql.com/docs/apollo-server/schema/unions-interfaces/
 # https://grandstack.io/docs/graphql-interface-union-types/
@@ -48,11 +48,20 @@ type Query {
     first: Int
     skip: Int
     after: String
+    # ?????
     orderBy: OrderOrderByInput
   ): [Order!]
   orderItems(query: String): [OrderItem!]!
-  myOrdersItems(query: String): [OrderItem!]!
+  # ????
+  myOrderItems(
+    query: String
+    first: Int
+    skip: Int
+    after: String
+    orderBy: OrderItemOrderByInput
+  ): [OrderItem!]!
   orderItem(query: String): [OrderItem!]!
+  orderItemsConnection(where: OrderItemWhereInput): OrderItemConnection!
   myCurrentOrder: Order
   order(id: ID!): Order!
 }
@@ -293,14 +302,16 @@ type OrderItem {
   count: Int!
   user: User!
   order: Order!
+  # reviewed: Boolean!
+  reviewed: Review
 }
 
 input OrderItemInput {
-  
   product: ID!
   count: Int! = 1
   order: ID!
   user: ID!
+  reviewed: Boolean! = false
 }
 
 type Review {

@@ -219,7 +219,7 @@ const Query = {
     );
   },
   // TODO - finish this query
-  myOrdersItems(parent, args, { prisma, request }, info) {
+  myOrderItems(parent, args, { prisma, request }, info) {
     const opArgs = {
       first: args.first,
       skip: args.skip,
@@ -235,16 +235,23 @@ const Query = {
             id: userId,
           },
         },
-        {
-          product: {
-            name_contains: args.query,
-          },
-        },
+        // {
+        //   product: {
+        //     name_contains: args.query,
+        //   },
+        // },
       ],
     };
-
+    if (args.query) {
+      opArgs.where.AND.push({
+        product: {
+          name_contains: args.query,
+        },
+      });
+    }
     return prisma.query.orderItems(opArgs, info);
   },
+  orderItemsConnection: forwardTo("prisma"),
   async orderItems(parent, args, { prisma, request }, info) {
     const sellerId = getUserId(request);
     const opArgs = {

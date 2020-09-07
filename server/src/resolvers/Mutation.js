@@ -494,6 +494,17 @@ const Mutation = {
       throw new Error("You have to be logged in user to write a review");
     }
 
+    const alreadyReviewed = await prisma.exists.Review({
+      user: {
+        id: userId,
+      },
+      product: { id: args.data.product },
+    });
+    console.log("already reviewed from createReview" + alreadyReviewed);
+    // if (alreadyReviewed) {
+    //   throw new Error("You have already reviewed this product!");
+    // }
+
     const allProductReviews = await prisma.query.reviews({
       where: {
         published: true,
@@ -512,7 +523,28 @@ const Mutation = {
     );
 
     // TODO - make sure user have the product among products they purchased
-    return prisma.mutation.createReview(
+
+    // find order items with this product
+    const orderItemsExist = await prisma.query.orderItems({
+      where: {
+        AND: [
+          {
+            user: {
+              id: userId,
+            },
+            product: {
+              id: args.data.product,
+            },
+          },
+        ],
+      },
+    }, info);
+
+    // console.log(orderItemsExist);
+
+    // console.log(orderItemsUpdated);
+    //create a review 
+    const createdReview = await prisma.mutation.createReview(
       {
         data: {
           ...args.data,
@@ -530,6 +562,48 @@ const Mutation = {
       },
       info
     );
+
+    console.log(createdReview);
+// connect the created review to all orderItems with the product
+    const updatedOrderItems = await Promise.all(
+        orderItemsExist.map(
+          async (orderItem) =>
+            await prisma.mutation.updateOrderItem({
+              where: { id: orderItem.id },
+              data: {
+                reviewed: {
+                  connect: {
+                    id: createdReview.id,
+                  },
+                },
+              },
+            }, info)
+        )
+      );
+    
+    await console.log(updatedOrderItems);
+    // const orderItemsUpdated = await prisma.mutation.updateManyOrderItems({
+    //   where: {
+    //     AND: [
+    //       {
+    //         user: {
+    //           id: userId,
+    //         },
+    //         product: {
+    //           id: args.data.product,
+    //         },
+    //       },
+    //     ],
+    //   },
+    //   data: {
+    //     reviewed: {
+    //       connect: {
+    //         id: createdReview.id,
+    //       },
+    //     },
+    //   },
+    // });
+    return createdReview;
   },
   async updateReview(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);
@@ -754,11 +828,18 @@ const Mutation = {
       `{ name description price image }`
     );
     // console.log("Is product available???");
-    console.log(productAvailable);
+    // console.log(productAvailable);
     if (!productAvailable) {
       throw new Error("Product is not available");
     }
+    // check if user already wrote review for the product
 
+    const alreadyReviewed = await prisma.exists.OrderItem({
+      user: { id: userId },
+      product: { id: args.id },
+      // reviewed: true,
+    });
+    console.log(alreadyReviewed);
     // check if a new order has already been created
     const [orderExists] = await prisma.query.orders(
       {
@@ -789,6 +870,7 @@ const Mutation = {
         info
       );
       // console.log(productAvailable);
+
       orderItemCreated = await prisma.mutation.createOrderItem(
         {
           data: {
@@ -828,6 +910,7 @@ const Mutation = {
         info
       );
       // console.log(updatedOrder);
+      // console.log(orderItemCreated)
       return orderItemCreated;
     }
 
@@ -842,7 +925,7 @@ const Mutation = {
     if (orderItemExists) {
       console.log("This product is already in the user's cart");
 
-      return prisma.mutation.updateOrderItem(
+      const updatedItem = await prisma.mutation.updateOrderItem(
         {
           where: { id: orderItemExists.id },
           data: {
@@ -852,6 +935,8 @@ const Mutation = {
         },
         info
       );
+      // console.log(updatedItem);
+      return updatedItem;
     }
 
     // if it's not in the cart and product stock is greater than 0, create a fresh cart item
@@ -950,7 +1035,7 @@ const Mutation = {
           total: charge.amount,
           charge: charge.id,
           finished: true,
-          finishedAt: new Date()
+          finishedAt: new Date(),
         },
       },
       info

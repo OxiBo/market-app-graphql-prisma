@@ -15,6 +15,7 @@ const calcProductRating = async (reviewList, productId, newRate, info, add) => {
   }
 
   // TODO - refactor it to call this mutation in Review mutations ???
+  // console.log(rating)
   await prisma.mutation.updateProduct(
     {
       where: {

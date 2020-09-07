@@ -70,6 +70,7 @@ type OrderItem {
   count: Int!@default(value: 1)
   order: Order!@relation(name: "OrderToItem", onDelete: SET_NULL)
   user: User!@relation(name: "OrderItemToUser", onDelete: SET_NULL)
+  reviewed: Review @relation(name: "ReviewToOrderItem", onDelete: SET_NULL)
   createdAt: DateTime! @createdAt
   updatedAt: DateTime!@updatedAt
 }
