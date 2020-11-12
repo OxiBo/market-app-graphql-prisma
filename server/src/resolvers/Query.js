@@ -126,7 +126,25 @@ const Query = {
   //       return prisma.query.reviews(opArgs, info);
   //     },
   //   },
-
+  async myReview(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    const [review] = await prisma.query.reviews({
+      where: {
+        AND: [
+          {
+            id: args.id,
+          },
+          {
+            user: {
+              id: userId,
+            },
+          },
+        ],
+      },
+    }, info);
+    console.log(review);
+    return review;
+  },
   reviews(parent, args, { prisma }, info) {
     // console.log(args)
     const opArgs = {

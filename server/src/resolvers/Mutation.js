@@ -472,7 +472,7 @@ const Mutation = {
 
     if (!productExists) {
       throw new Error(
-        "Unable to delete the product. Product not found in your product list"
+        "Unable to delete the product. Product not found in your products list"
       );
     }
     return prisma.mutation.deleteProduct(
@@ -525,25 +525,28 @@ const Mutation = {
     // TODO - make sure user have the product among products they purchased
 
     // find order items with this product
-    const orderItemsExist = await prisma.query.orderItems({
-      where: {
-        AND: [
-          {
-            user: {
-              id: userId,
+    const orderItemsExist = await prisma.query.orderItems(
+      {
+        where: {
+          AND: [
+            {
+              user: {
+                id: userId,
+              },
+              product: {
+                id: args.data.product,
+              },
             },
-            product: {
-              id: args.data.product,
-            },
-          },
-        ],
+          ],
+        },
       },
-    }, info);
+      info
+    );
 
     // console.log(orderItemsExist);
 
     // console.log(orderItemsUpdated);
-    //create a review 
+    //create a review
     const createdReview = await prisma.mutation.createReview(
       {
         data: {
@@ -563,12 +566,13 @@ const Mutation = {
       info
     );
 
-    console.log(createdReview);
-// connect the created review to all orderItems with the product
+    // console.log(createdReview);
+    // connect the created review to all orderItems with the product
     const updatedOrderItems = await Promise.all(
-        orderItemsExist.map(
-          async (orderItem) =>
-            await prisma.mutation.updateOrderItem({
+      orderItemsExist.map(
+        async (orderItem) =>
+          await prisma.mutation.updateOrderItem(
+            {
               where: { id: orderItem.id },
               data: {
                 reviewed: {
@@ -577,11 +581,13 @@ const Mutation = {
                   },
                 },
               },
-            }, info)
-        )
-      );
-    
-    await console.log(updatedOrderItems);
+            },
+            info
+          )
+      )
+    );
+
+    // await console.log(updatedOrderItems);
     // const orderItemsUpdated = await prisma.mutation.updateManyOrderItems({
     //   where: {
     //     AND: [
@@ -815,9 +821,10 @@ const Mutation = {
     );
   },
   async addToOrder(parent, args, { prisma, request }, info) {
+    // console.log(args)
     // check if the user is logged in
     const userId = getUserId(request);
-    console.log(args);
+    // console.log(args);
     // find the product to get price and availability
     const [productAvailable] = await prisma.query.products(
       {
@@ -825,21 +832,27 @@ const Mutation = {
           AND: [{ id: args.id }, { stock_gt: 0 }],
         },
       },
-      `{ name description price image }`
+      `{ name description price image, stock}`
     );
+
     // console.log("Is product available???");
     // console.log(productAvailable);
+
     if (!productAvailable) {
       throw new Error("Product is not available");
     }
-    // check if user already wrote review for the product
+    // save stock amount into separate const
+    const stock = productAvailable.stock;
 
-    const alreadyReviewed = await prisma.exists.OrderItem({
-      user: { id: userId },
-      product: { id: args.id },
-      // reviewed: true,
-    });
-    console.log(alreadyReviewed);
+    delete productAvailable.stock;
+    // ???? check if user already wrote review for the product
+
+    // const alreadyReviewed = await prisma.exists.OrderItem({
+    //   user: { id: userId },
+    //   product: { id: args.id },
+    //   // reviewed: true,
+    // });
+    // console.log(alreadyReviewed);
     // check if a new order has already been created
     const [orderExists] = await prisma.query.orders(
       {
@@ -852,8 +865,6 @@ const Mutation = {
 
     let orderItemCreated;
 
-    // const test = await prisma.query.orders(null, '{id items{id}}')
-    // console.log(test)
     // if order(cart) was not created yet
     if (!orderExists) {
       const newOrder = await prisma.mutation.createOrder(
@@ -911,6 +922,18 @@ const Mutation = {
       );
       // console.log(updatedOrder);
       // console.log(orderItemCreated)
+
+      // TODO - change product stock
+      // console.log(productAvailable.stock)
+      await prisma.mutation.updateProduct(
+        {
+          where: { id: args.id },
+          data: {
+            stock: stock - 1,
+          },
+        },
+        info
+      );
       return orderItemCreated;
     }
 
@@ -936,6 +959,16 @@ const Mutation = {
         info
       );
       // console.log(updatedItem);
+      // TODO - change product stock
+      await prisma.mutation.updateProduct(
+        {
+          where: { id: args.id },
+          data: {
+            stock: stock - 1,
+          },
+        },
+        info
+      );
       return updatedItem;
     }
 
@@ -962,6 +995,16 @@ const Mutation = {
       info
     );
     // console.log(orderItemCreated);
+    // TODO - change product stock
+    await prisma.mutation.updateProduct(
+      {
+        where: { id: args.id },
+        data: {
+          stock: stock - 1,
+        },
+      },
+      info
+    );
     return orderItemExists;
 
     // return orderItemCreated;
@@ -981,7 +1024,8 @@ const Mutation = {
     if (!itemExists) {
       throw new Error("The item is not found or does not belong to your cart");
     }
-    return prisma.mutation.deleteOrderItem(
+
+    const deletedItem = await prisma.mutation.deleteOrderItem(
       {
         where: {
           id: args.id,
@@ -989,6 +1033,34 @@ const Mutation = {
       },
       info
     );
+    // const itemsInCart = await prisma.query.orderItems({
+    //   where: { user: { id: userId } },
+    // });
+    // console.log("ORDER  ITEMS");
+    // console.log(itemsInCart);
+    const [currOrder] = await prisma.query.orders(
+      {
+        where: {
+          AND: [{ user: { id: userId } }, { finished: false }],
+        },
+      },
+      "{id items { id }}"
+    );
+    console.log("Current order");
+    console.log(currOrder);
+    if (currOrder.items.length === 0) {
+      await prisma.mutation.deleteOrder({ where: { id: currOrder.id } }, info);
+    }
+
+    return deletedItem;
+    // prisma.mutation.deleteOrderItem(
+    //   {
+    //     where: {
+    //       id: args.id,
+    //     },
+    //   },
+    //   info
+    // );
   },
   async checkoutAndPay(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);

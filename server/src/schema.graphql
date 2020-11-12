@@ -33,6 +33,7 @@ type Query {
   meUser: User!
   meSeller: Seller!
   seller(id: ID!): Seller!
+  myReview(id: ID!): Review!
   reviews(
     where: ReviewWhereInput
     productId: ID
