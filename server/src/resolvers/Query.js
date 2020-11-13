@@ -86,7 +86,7 @@ const Query = {
   //       },
   //   },
   // TODO - show only products which count is more than 0
-  products(parent, args, { prisma }, info) {
+  async products(parent, args, { prisma }, info) {
     const opArgs = {
       first: args.first,
       skip: args.skip,
@@ -107,8 +107,10 @@ const Query = {
         ],
       };
     }
-    console.log(opArgs);
-    return prisma.query.products(opArgs, info);
+    // console.log(opArgs);
+    const allProducts = await prisma.query.products(opArgs, info);
+    console.log(allProducts)
+    return allProducts;
   },
   product: forwardTo("prisma"),
   productsConnection: forwardTo("prisma"),

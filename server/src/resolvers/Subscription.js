@@ -4,7 +4,7 @@ import getUserId from "../utils/getUserId";
 const Subscription = {
   product: {
     subscribe(parent, args, { prisma }, info) {
-      // console.log(info);
+      console.log("subscription for an item");
       return prisma.subscription.product(
         {
           where: {
@@ -18,7 +18,7 @@ const Subscription = {
             // ],
           // },
         },
-       info
+       "{ node { id name image description rating stock price }}"
       );
     },
   },

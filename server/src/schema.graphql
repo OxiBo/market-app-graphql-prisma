@@ -269,7 +269,7 @@ input UpdateProductInput {
   largeImage: String
   price: Int
   stock: Int
-  desctiption: String
+  description: String
   # count: Int
 }
 
