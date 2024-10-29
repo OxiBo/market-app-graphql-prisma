@@ -57,3 +57,8 @@ Create a `.env` file in the root directory and add the necessary environment var
 ## Client Repository
 
 For the client-side code, please check out the repository: [Market Place Client](https://github.com/OxiBo/market-place-client)
+
+## Maintenance
+
+**Note**: This project is currently not maintained.
+
